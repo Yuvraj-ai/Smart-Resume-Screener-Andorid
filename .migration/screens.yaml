@@ -1,0 +1,123 @@
+# Target Android screens. Navigation and state model, per decision d4.
+
+navigation_graph:
+  start_destination: dashboard
+  bottom_bar:
+    - dashboard
+    - screen
+    - candidates
+    - settings
+  secondary_destinations:
+    - candidate_detail   # not in the bottom bar, opened from dashboard and candidates
+
+screens:
+
+  - id: dashboard
+    name: Dashboard
+    purpose: >
+      Answer "how is screening going" at a glance. This is an addition: the
+      source app has no aggregate view, only a flat chronological list.
+    components:
+      - StatTileRow: total screened, average score, best score, screened-this-week
+      - ScoreDistributionBar: counts per score band 1-10
+      - TopMatchesList: highest-scoring candidates, tappable to detail
+      - RecentActivityList: last N screenings with score and job title
+      - StorageBackendCaption: active backend, always visible
+      - EmptyState: prompts the user to run a first screening
+    states: [idle, loading, success, empty, error]
+    navigation:
+      enters_from: [app_launch, bottom_bar]
+      exits_to: [candidate_detail, screen]
+    features:
+      - aggregate_dashboard_stats
+      - candidates_dashboard
+      - storage_backend_label
+
+  - id: screen
+    name: Screen
+    purpose: Run the pipeline. Replaces the source app's single-page upload form.
+    components:
+      - JobDescriptionField: multiline, shared across the batch
+      - PdfPickerButton: SAF multi-select, PDF mime only
+      - SelectedFilesList: chosen files with remove affordance
+      - RunButton: disabled until a file and a JD are present
+      - ProgressList: per-file state, live as the batch advances
+      - ResultRow: name, score, justification, tap to detail
+      - ErrorRow: filename plus reason, matching source behavior
+    states: [idle, validating, running, partial_success, success, error]
+    navigation:
+      enters_from: [bottom_bar]
+      exits_to: [candidate_detail]
+    features:
+      - multi_pdf_upload
+      - jd_text_input
+      - batch_partial_failure
+      - resume_structured_extraction
+      - jd_structured_extraction
+      - match_scoring
+
+  - id: candidates
+    name: Candidates
+    purpose: Browse everything screened so far, with search and filtering.
+    components:
+      - SearchField: match on candidate name or job title
+      - FilterChips: score band, job title
+      - CandidateList: score, name, job title, screened-at
+      - SortControl: date or score
+      - EmptyState
+    states: [idle, loading, success, empty, error]
+    navigation:
+      enters_from: [bottom_bar]
+      exits_to: [candidate_detail]
+    features:
+      - candidates_dashboard
+      - candidate_search_filter
+
+  - id: candidate_detail
+    name: Candidate Detail
+    purpose: >
+      The full analysis for one result. In the source app this was a collapsed
+      expander; here it is its own destination, per d4.
+    components:
+      - ScoreHeader: large score out of 10
+      - BreakdownBars: skills / experience / education sub-scores with weights
+      - MatchSummary: the model's justification
+      - CandidateDetails: parsed resume fields
+      - JobDetails: parsed job description fields
+      - RawJsonSection: the exact stored JSON, mirroring the source app's st.json
+      - DeleteAction: destructive, with confirmation
+    states: [idle, loading, success, not_found, error]
+    navigation:
+      enters_from: [dashboard, candidates, screen]
+      exits_to: [candidates, dashboard]
+    features:
+      - full_analysis_expander
+      - result_deletion
+      - d7_scoring_breakdown
+
+  - id: settings
+    name: Settings
+    purpose: >
+      All configuration in one place, including the Gemini API key the user
+      explicitly asked to be entered here.
+    components:
+      - ApiKeyField: masked input, stored Keystore-encrypted, never logged
+      - KeyStatusRow: unconfigured / configured / verified against the API
+      - SecurityNotice: states plainly that the key is stored on this device
+      - ModelSelector: parsing model and scoring model, per d6
+      - StorageSection: local Room, with the backend caption
+      - TestConnectionAction: verify the key with a minimal call
+    states: [idle, saving, verifying, verified, invalid_key, error]
+    navigation:
+      enters_from: [bottom_bar]
+      exits_to: []
+    features:
+      - settings_api_key
+      - storage_backend_label
+      - d6_model_choice
+
+removed_screens:
+  - id: none
+    note: >
+      No screen is dropped. Every source capability maps to a destination above;
+      the inline expander became candidate_detail.

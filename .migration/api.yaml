@@ -1,0 +1,114 @@
+# External API contract.
+#
+# Decision d2: there is no Python backend, so this file documents the ONLY
+# network dependency, the Gemini REST API, called directly from the device.
+# It replaces langchain_google_genai.with_structured_output.
+
+base_url: "https://generativelanguage.googleapis.com/v1beta"
+
+auth:
+  mechanism: "API key via x-goog-api-key header"
+  source: "Keystore-encrypted AppSettings.geminiApiKey, entered in the Settings screen"
+  notes: >
+    Never placed in a URL query string, so it cannot leak into server logs or
+    crash reports. Never logged on the client.
+
+endpoints:
+
+  - id: gemini_generate_content
+    method: POST
+    path: "/models/{model}:generateContent"
+    purpose: >
+      One structured extraction or scoring call. All three pipeline nodes use
+      this single operation, differing only in model, prompt, and responseSchema.
+    used_by: [resume_structured_extraction, jd_structured_extraction, match_scoring]
+    request:
+      headers:
+        "Content-Type": "application/json"
+        "x-goog-api-key": "<from settings>"
+      body:
+        contents: "Single user turn carrying the prompt and the source text."
+        generationConfig:
+          temperature: 0
+          responseMimeType: "application/json"
+          responseSchema: "Declared per call; this is the equivalent of with_structured_output."
+    response:
+      candidates: "Array; text of the first candidate is the JSON payload."
+    errors:
+      - "400 invalid API key -> surfaced in Settings as invalid_key"
+      - "429 rate limit -> retried with backoff, then reported per file"
+      - "5xx -> retried twice, matching max_retries=2 in the source"
+      - "no candidates in response -> per-file error, batch continues"
+    source_functions: [extract_data, extract_jd, resume_match]
+
+  - id: gemini_list_models
+    method: GET
+    path: "/models"
+    purpose: Verify a key and populate the model pickers in Settings.
+    used_by: [settings_api_key]
+    request: { headers: { "x-goog-api-key": "<from settings>" } }
+    response: "models[] with name and displayName."
+    errors:
+      - "400/403 -> invalid_key state in Settings"
+    source_functions: []
+
+pipeline_equivalence:
+  note: >
+    The source chain START -> parseResume -> parseJd -> computeScore -> END has
+    no conditional edges, so it maps to a sequential suspend function. Three
+    calls per resume, in the same order, with the same prompts.
+  calls_per_resume: 3
+  order: [extract_data, extract_jd, resume_match]
+  temperature: 0
+  retry_policy: "max 2 retries, per node, matching the source"
+
+response_schemas:
+  Resume:
+    model: gemini-2.5-flash
+    note: "Source schema, 8 string fields. phone is a string so leading zeros and country codes survive."
+    fields:
+      name: string
+      email: string
+      githublink: string
+      linkedinlink: string
+      phone: string
+      skills: string
+      education: string
+      experience: string
+      projects: string
+
+  JobDescription:
+    model: gemini-2.5-flash
+    note: "Source jobDisc schema, unchanged."
+    fields:
+      job_title: string
+      skills_reqd: string
+      experience_reqd: string
+      edu_reqd: string
+      responsibilities: string
+
+  MatchResult:
+    model: gemini-2.5-pro
+    note: >
+      CHANGED by decision d7. score and summary are unchanged; breakdown is
+      new. Weights live in the prompt only, so the UI computes the weighted
+      contribution rather than trusting a model-supplied total.
+    fields:
+      score: number
+      summary: string
+      breakdown:
+        type: object
+        properties:
+          skills: integer
+          experience: integer
+          education: integer
+
+prompt_fidelity:
+  requirement: >
+    backend/nodes/match_score_node.py contains a ~60-line rubric that is product
+    behavior, not incidental text. It must be carried over verbatim: the 60/30/10
+    weights, the scoring bands, and the "do NOT infer, assume, or guess missing
+    data" instruction. The only edit is the required-output block, which changes
+    from "fit_summary" to "summary" to match the schema, plus the new breakdown
+    object required by d7.
+  verification: "Prompts are compared field-by-field against the source in Phase 5."

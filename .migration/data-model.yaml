@@ -1,0 +1,111 @@
+# Data model. Room over SQLite, decision d3.
+# The source app's document shape is preserved exactly, so a record written
+# here is structurally identical to one written by the Python app.
+
+entities:
+
+  ScreeningResult:
+    description: One candidate scored against one job description.
+    table: screening_results
+    fields:
+      - name: id
+        type: "Long"
+        constraints: "PK, autoGenerate"
+        notes: "Stand-in for Mongo's _id."
+      - name: sourceFileName
+        type: "String"
+        notes: "Original upload filename, for display only. Never used as a path."
+      - name: createdAt
+        type: "Long"
+        notes: "Epoch millis. Powers the dashboard's recency stats."
+      - name: score
+        type: "Double"
+        notes: "1-10, mirrors the source's float score."
+      - name: summary
+        type: "String"
+        notes: "The model's 2-4 sentence justification."
+      # --- promoted out of the JSON for query and display ---
+      - name: candidateName
+        type: "String"
+        indexes: [search_index]
+        notes: "Promoted from candidate_details.name so search and sorting are indexed."
+      - name: jobTitle
+        type: "String"
+        indexes: [search_index]
+        notes: "Promoted from job_details.job_title."
+      - name: skillScore
+        type: "Int?"
+        notes: "Sub-score, decision d7. Nullable so older rows stay valid."
+      - name: experienceScore
+        type: "Int?"
+      - name: educationScore
+        type: "Int?"
+      # --- retained verbatim ---
+      - name: candidateDetailsJson
+        type: "String"
+        notes: >
+          Full candidate_details object as JSON. Retained so nothing is lost if
+          the schema grows, mirroring the source app's JSON-in-one-column choice.
+      - name: jobDetailsJson
+        type: "String"
+      - name: matchAnalysisJson
+        type: "String"
+
+    source_document_shape: |
+      Preserved from backend/utils/db.py, unchanged:
+      {
+        "candidate_details": {name, email, githublink, linkedinlink, phone,
+                              skills, education, experience, projects},
+        "job_details":     {job_title, skills_reqd, experience_reqd,
+                            edu_reqd, responsibilities},
+        "match_analysis":  {score, summary}
+      }
+
+  AppSettings:
+    description: >
+      Keystore-encrypted preferences. Not a Room table: settings are small,
+      read on nearly every screen, and must sit behind encryption.
+    storage: "EncryptedSharedPreferences (Android Keystore, AES256-GCM)"
+    fields:
+      - name: geminiApiKey
+        type: "String"
+        sensitive: true
+        notes: "User-entered. Never logged, never in the APK, excluded from backup."
+      - name: parseModel
+        type: "String"
+        default: "gemini-2.5-flash"
+      - name: scoreModel
+        type: "String"
+        default: "gemini-2.5-pro"
+      - name: onboardingComplete
+        type: "Boolean"
+        default: false
+
+transformations:
+  - from: screen model
+    to: ScreeningResult
+    when: "After the pipeline returns; JSON blobs serialized, scalars promoted to indexed columns."
+  - from: ScreeningResult
+    to: screen model
+    when: "On read; JSON blobs decoded, so a field added later needs no migration to display."
+
+data_operations:
+  - id: insert_result
+    description: Persist one completed screening. Replaces db.save_candidate.
+  - id: list_results
+    description: "All results, newest first. Replaces db.fetch_candidates."
+  - id: search_results
+    description: Filter by name or job title, optional score band. New.
+  - id: delete_result
+    description: Remove one record. New.
+  - id: aggregate_stats
+    description: >
+      Count, average, max, score-band histogram, per-week count. Computed in SQL
+      where possible rather than loading every row. New, dashboard only.
+
+not_implemented:
+  - id: mongodb_sync
+    reason: >
+      Decision d3. Android cannot speak the MongoDB wire protocol, so there is
+      no sync target. Would require an Atlas Data API endpoint, which is a
+      separate piece of work if ever wanted.

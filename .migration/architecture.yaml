@@ -1,0 +1,84 @@
+# Current vs. proposed architecture.
+# Decisions applied: d1 personal/on-device key, d2 on-device Gemini REST,
+# d3 local Room only, d4 four-section nav, d7 sub-score breakdown.
+
+current:
+  platform: server-side Python on Streamlit
+  layers:
+    presentation: "app.py, single page, 19 st.* constructs, no session state"
+    orchestration: "backend/graph.py, LangGraph StateGraph, linear 3-node chain"
+    ai: "backend/nodes/*.py, langchain-google-genai with_structured_output"
+    parsing: "backend/utils/document_loader.py, PyMuPDF"
+    persistence: "backend/utils/db.py, MongoDB Atlas with SQLite fallback"
+    config: "python-dotenv, GOOGLE_API_KEY + optional MONGODB_URI"
+  host_dependencies: [langgraph, langchain, pydantic, pymongo, PyMuPDF]
+
+proposed:
+  platform: Android native, Kotlin + Jetpack Compose, Material 3
+  min_sdk: 26
+  target_sdk: 36
+  compile_sdk: 36
+  jvm_toolchain: 17
+  layers:
+    presentation: >
+      Compose screens under feature/ (dashboard, screen, candidates, detail,
+      settings), stateless composables, state hoisted to ViewModels.
+    navigation: "Navigation Compose, bottom bar across the four sections"
+    state: "ViewModel + StateFlow, unidirectional data flow"
+    domain: >
+      ScreeningPipeline use case. Replaces LangGraph: the source chain is
+      strictly linear with no branches, so it is a suspend function sequence
+      rather than a graph. No graph library is warranted.
+    ai: "GeminiClient over OkHttp + kotlinx.serialization, responseSchema for structured output"
+    parsing: "PDFBox-Android (PDDocument.load), replaces PyMuPDF"
+    persistence: "Room over SQLite, typed columns plus retained raw JSON"
+    config: >
+      EncryptedSharedPreferences backed by Android Keystore AES256-GCM.
+      No .env equivalent; the APK ships no credentials.
+
+  # What was deliberately NOT carried over, and why.
+  not_carried:
+    - thing: langgraph
+      reason: "Chain is linear with no conditional edges; a sequence is equivalent and far smaller."
+    - thing: langchain / pydantic
+      reason: "Replaced by Gemini responseSchema + kotlinx.serialization."
+    - thing: pymongo + MONGODB_URI settings field
+      reason: >
+        Android cannot speak the MongoDB wire protocol (decision d3). The user
+        chose local-only, so no Mongo URI field is built. Revisit via Atlas
+        Data API if sync is ever wanted.
+    - thing: langchain-community PyMuPDFLoader
+      reason: "Requires an on-disk path and would drag a large dependency; PDFBox-Android is the native equivalent."
+
+security_posture:
+  api_key: "User-entered in Settings, Keystore-encrypted at rest, never logged, never in the APK."
+  allow_backup: false
+  cleartext_traffic: false
+  internet_permission: "Required for Gemini calls. Not required for storage, which is local-only."
+  release_build_keys: "Fail closed with a message pointing at Settings. No placeholder or default key."
+  pii: "Resume text is PII. Never written to logcat; parser failures reported per file, not as crashes."
+
+dependencies:
+  - androidx.core:core-ktx
+  - androidx.activity:activity-compose
+  - androidx.lifecycle:lifecycle-viewmodel-compose
+  - androidx.navigation:navigation-compose
+  - androidx.compose:compose-bom
+  - androidx.compose.material3:material3
+  - androidx.compose.material:material-icons-extended
+  - androidx.room:room-runtime
+  - androidx.room:room-ktx
+  - androidx.room:room-compiler  # kapt/ksp
+  - com.google.dagger:hilt-android
+  - com.google.dagger:hilt-compiler
+  - androidx.hilt:hilt-navigation-compose
+  - androidx.security:security-crypto
+  - com.squareup.okhttp3:okhttp
+  - org.jetbrains.kotlinx:kotlinx-serialization-json
+  - com.tom-roush:pdfbox-android
+  - androidx.datastore:datastore-preferences  # only if prefs prove insufficient
+
+testing:
+  unit: "Pipeline orchestration with a fake GeminiClient; Room DAO tests with in-memory DB; Keystore wrapper."
+  instrumented: "Compose UI tests for navigation and per-file partial-failure rendering."
+  validation: "Build, install on the onemind_test AVD (Pixel 6, android-36), screenshot each screen."

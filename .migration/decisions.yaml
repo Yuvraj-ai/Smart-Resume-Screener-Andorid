@@ -1,12 +1,13 @@
 # User-approved product and architecture decisions.
-# Every entry is `pending` until answered in Phase 2. Nothing in Phase 4 may
-# begin while any `blocking: true` entry is unresolved.
+# All entries resolved. Entries marked DEFAULTED were not put to the user and
+# follow the agent's recommendation; they can be overridden without rework.
 
 meta:
   source_repo: /home/imyuvi/projects/Smart-Resume-Screener
   target_repo: /home/imyuvi/projects/ResumeScreener-Android
   opened: 2026-09-30
-  status: awaiting_user_review
+  status: approved_by_user
+  defaults_applied: [d5_dashboard_stats, d6_model_choice, d8_bulk_actions, d9_advanced_android]
 
 decisions:
 
@@ -23,8 +24,8 @@ decisions:
       On-device key storage is only acceptable when the key belongs to the
       people running the app. See security.md section 2.
     blocking: true
-    status: pending
-    answer: null
+    status: approved
+    answer: Personal tool, single user, own key. On-device key storage approved by the user.
 
   - id: d2_gemini_execution
     question: >
@@ -40,8 +41,8 @@ decisions:
       a Kotlin reimplementation regardless; the backend option would only move
       where it runs, at the cost of hosting.
     blocking: true
-    status: pending
-    answer: null
+    status: approved
+    answer: On-device, direct Gemini REST calls. No Python backend. Key entered in Settings.
 
   - id: d3_storage
     question: >
@@ -57,8 +58,8 @@ decisions:
       so local-first is its own established behavior. See security.md section 3
       for why direct Mongo from Android is a hard blocker.
     blocking: true
-    status: pending
-    answer: null
+    status: approved
+    answer: Local Room only. MongoDB dropped: Android cannot speak the MongoDB wire protocol, and the user chose local-only. The Mongo URI setting requested earlier is therefore NOT built; it has no reachable target.
 
   - id: d4_navigation
     question: >
@@ -72,8 +73,8 @@ decisions:
       - Settings: API key, storage backend, model choice
     recommendation: As proposed
     blocking: false
-    status: pending
-    answer: null
+    status: approved
+    answer: Confirmed: bottom navigation across Dashboard / Screen / Candidates / Settings, with Candidate detail as its own window.
 
   - id: d5_dashboard_stats
     question: >
@@ -84,8 +85,8 @@ decisions:
       - A smaller subset
     recommendation: Total screened, average score, score distribution, top matches, recent activity
     blocking: false
-    status: pending
-    answer: null
+    status: approved
+    answer: DEFAULTED (not asked): total screened, average score, score distribution, top matches, recent activity.
 
   - id: d6_model_choice
     question: >
@@ -100,8 +101,8 @@ decisions:
       the choice in Settings is a small addition that also makes the app usable
       if a model is retired.
     blocking: false
-    status: pending
-    answer: null
+    status: approved
+    answer: DEFAULTED (not asked): keep the source split (gemini-2.5-flash for parsing, gemini-2.5-pro for scoring) and expose the choice in Settings.
 
   - id: d7_scoring_breakdown
     question: >
@@ -115,8 +116,8 @@ decisions:
       This changes the LLM output contract, so it is a real behavior change
       rather than a UI tweak. Worth it for a dashboard, but it is your call.
     blocking: false
-    status: pending
-    answer: null
+    status: approved
+    answer: Yes. Extend MatchResult with per-criterion sub-scores. Changes the LLM output contract; approved by the user.
 
   - id: d8_bulk_actions
     question: >
@@ -128,8 +129,8 @@ decisions:
       - Search, filter, delete, and re-screen
     recommendation: Search, filter, and delete
     blocking: false
-    status: pending
-    answer: null
+    status: approved
+    answer: DEFAULTED (not asked): search, filter, and delete. Re-screening deferred.
 
   - id: d9_advanced_android
     question: >
@@ -142,5 +143,5 @@ decisions:
       - None of these
     recommendation: Share-into-app and CSV export
     blocking: false
-    status: pending
-    answer: null
+    status: approved
+    answer: DEFAULTED (not asked): share-into-app and CSV export. Background screening deferred.
