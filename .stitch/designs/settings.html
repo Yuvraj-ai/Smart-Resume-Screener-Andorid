@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - Configuration &amp; AI Credentials</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter & JetBrains Mono Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Public+Sans:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {},
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "1rem",
+            "xl": "1.5rem",
+            "full": "9999px"
+          },
+          spacing: {},
+          fontFamily: {
+            "headline": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          fontSize: {}
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Hide native password reveal in WebKit */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+      display: none;
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-slate-950 text-slate-100 font-body antialiased min-h-screen selection:bg-emerald-500/20 selection:text-emerald-200 flex justify-center">
+<!-- Mobile Viewport Frame (Centered on desktop, edge-to-edge on mobile) -->
+<div class="w-full max-w-md bg-slate-950 min-h-screen flex flex-col relative shadow-2xl overflow-x-hidden border-x border-slate-900/60">
+<!-- TopAppBar Shared Component Anchor -->
+<header class="sticky top-0 z-40 bg-slate-900 dark:bg-slate-950 border-b border-slate-800 dark:border-slate-800/80">
+<div class="flex justify-between items-center w-full px-5 py-3.5">
+<div class="flex items-center gap-3">
+<button aria-label="Go back" class="p-1 -ml-1 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 rounded-lg transition-colors duration-150 active:opacity-80" type="button">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div>
+<h1 class="font-headline font-semibold text-slate-100 tracking-tight text-lg leading-tight">Settings</h1>
+</div>
+</div>
+<button aria-label="Help and documentation" class="p-1 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 rounded-lg transition-colors duration-150 active:opacity-80" type="button">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+<!-- Sub-headline contextual reassurance -->
+<div class="px-5 pb-3 pt-0.5">
+<p class="font-body text-xs text-slate-400 leading-relaxed">
+          Configuration and API credentials are stored securely on this device.
+        </p>
+</div>
+</header>
+<!-- Main Scrollable Canvas -->
+<main class="flex-1 px-5 pt-6 pb-28 space-y-7 overflow-y-auto">
+<!-- SECTION 1: GEMINI API -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm" data-icon="key">key</span>
+<span class="font-mono text-xs font-semibold tracking-wider text-slate-400 uppercase">GEMINI API</span>
+</div>
+<!-- Configuration Status Pill -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-400" id="status-badge">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="status-dot"></span>
+<span id="status-text">Not configured</span>
+</div>
+</div>
+<!-- Input Box Container -->
+<div class="bg-slate-900/90 border border-slate-800 focus-within:border-emerald-300/60 rounded-xl p-1 transition-colors duration-150">
+<div class="relative flex items-center">
+<input autocomplete="off" class="w-full bg-transparent border-0 text-slate-100 placeholder:text-slate-500 font-mono text-xs py-3 pl-3.5 pr-20 focus:ring-0 focus:outline-none" id="api-key-input" placeholder="Paste your API key" spellcheck="false" type="password"/>
+<div class="absolute right-2 flex items-center gap-1">
+<!-- Visibility Toggle -->
+<button aria-label="Toggle password visibility" class="p-1.5 text-slate-400 hover:text-slate-200 transition-colors" id="toggle-visibility-btn" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="visibility" id="visibility-icon">visibility</span>
+</button>
+<!-- Paste Button -->
+<button class="inline-flex items-center gap-1 px-2 py-1 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-slate-100 rounded-md text-[11px] font-mono transition-colors active:scale-95" id="paste-btn" title="Paste from clipboard" type="button">
+<span class="material-symbols-outlined text-xs" data-icon="content_paste">content_paste</span>
+<span>Paste</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Local Keychain Security Reassurance -->
+<div class="flex items-start gap-2 px-1">
+<span class="material-symbols-outlined text-slate-500 text-sm mt-0.5" data-icon="shield">shield</span>
+<p class="font-body text-xs text-slate-400 leading-relaxed">
+            Stored encrypted in local device keychain. Never transmitted except directly to Google Gemini API.
+          </p>
+</div>
+<!-- Action Row -->
+<div class="pt-1.5 flex flex-col gap-2.5">
+<button class="w-full py-2.5 px-4 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-500 text-sm font-medium flex items-center justify-center gap-2 cursor-not-allowed transition-all duration-150" disabled="" id="test-connection-btn" type="button">
+<span class="material-symbols-outlined text-base" data-icon="bolt">bolt</span>
+<span>Test connection</span>
+</button>
+<div class="flex justify-center items-center">
+<a class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-300 transition-colors duration-150 py-1" href="https://aistudio.google.com/" rel="noopener noreferrer" target="_blank">
+<span>Get an API key from Google AI Studio</span>
+<span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span>
+</a>
+</div>
+</div>
+</section>
+<!-- SECTION 2: MODELS -->
+<section class="space-y-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm" data-icon="tune">tune</span>
+<span class="font-mono text-xs font-semibold tracking-wider text-slate-400 uppercase">MODELS</span>
+</div>
+<div class="bg-slate-900/60 border border-slate-800/90 rounded-xl divide-y divide-slate-800/80 overflow-hidden">
+<!-- Row 1: Parsing model -->
+<div class="p-4 space-y-2.5">
+<div class="flex items-start justify-between gap-3">
+<div>
+<p class="font-headline text-sm font-medium text-slate-200">Parsing model</p>
+<p class="font-body text-xs text-slate-400 leading-snug mt-0.5">
+                  Extracts entities, work experience, and job requirements
+                </p>
+</div>
+<span class="inline-flex shrink-0 items-center px-2 py-0.5 rounded-full text-[10px] font-mono tracking-tight bg-slate-800 text-slate-300 border border-slate-700/60">
+                Fast &amp; efficient
+              </span>
+</div>
+<!-- Tactile Dropdown / Button Selector -->
+<button class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-950/80 hover:bg-slate-800/50 border border-slate-800 rounded-lg text-left transition-colors duration-150 group" type="button">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+<span class="font-mono text-xs font-medium text-slate-200">Gemini 1.5 Flash</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-slate-200 text-base" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- Row 2: Scoring model -->
+<div class="p-4 space-y-2.5">
+<div class="flex items-start justify-between gap-3">
+<div>
+<p class="font-headline text-sm font-medium text-slate-200">Scoring model</p>
+<p class="font-body text-xs text-slate-400 leading-snug mt-0.5">
+                  Produces fit score, qualification matrix, and candidate justification
+                </p>
+</div>
+<span class="inline-flex shrink-0 items-center px-2 py-0.5 rounded-full text-[10px] font-mono tracking-tight bg-emerald-950/50 text-emerald-300 border border-emerald-800/40">
+                Deep reasoning
+              </span>
+</div>
+<!-- Tactile Dropdown / Button Selector -->
+<button class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-950/80 hover:bg-slate-800/50 border border-slate-800 rounded-lg text-left transition-colors duration-150 group" type="button">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-300"></span>
+<span class="font-mono text-xs font-medium text-slate-200">Gemini 1.5 Pro</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-slate-200 text-base" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+</section>
+<!-- SECTION 3: STORAGE -->
+<section class="space-y-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm" data-icon="database">database</span>
+<span class="font-mono text-xs font-semibold tracking-wider text-slate-400 uppercase">STORAGE</span>
+</div>
+<div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-4 flex items-start gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-emerald-950/40 border border-emerald-800/30 flex items-center justify-center shrink-0 text-emerald-300">
+<span class="material-symbols-outlined text-lg" data-icon="storage">storage</span>
+</div>
+<div class="space-y-1.5 flex-1">
+<div class="flex items-center justify-between">
+<h4 class="font-headline text-sm font-medium text-slate-200">Local SQLite Database</h4>
+</div>
+<p class="font-body text-xs text-slate-400 leading-relaxed">
+              All candidate resumes, extracted profiles, and screening scores are retained exclusively on this device. Nothing is uploaded or synced to external cloud services.
+            </p>
+<div class="pt-1.5">
+<span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-300/90 bg-slate-950/70 border border-slate-800 px-2.5 py-1 rounded-md">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                0 cloud telemetry · 100% On-device
+              </span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: ABOUT -->
+<section class="space-y-2 pt-2">
+<div class="p-4 rounded-xl border border-slate-900 bg-slate-950/40 text-center space-y-2">
+<p class="font-headline text-xs font-semibold text-slate-300 tracking-tight">Ink &amp; Mint Screener</p>
+<p class="font-mono text-[11px] text-slate-500">Version 1.2.0 (Build 42)</p>
+<div class="flex justify-center items-center gap-4 text-xs text-slate-400 pt-1">
+<a class="hover:text-emerald-300 transition-colors" href="#privacy">Privacy Policy</a>
+<span class="text-slate-700">·</span>
+<a class="hover:text-emerald-300 transition-colors" href="#license">Open Source Licenses</a>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shared Component Anchor -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-slate-900 dark:bg-slate-950 border-t border-slate-800 dark:border-slate-800/80">
+<!-- Candidates -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 font-normal py-1 hover:text-slate-200 transition-colors duration-150 active:scale-95 transition-transform duration-100 group" href="#candidates">
+<span class="material-symbols-outlined text-2xl group-hover:text-slate-200" data-icon="group">group</span>
+<span class="font-label text-xs tracking-wide uppercase mt-0.5">Candidates</span>
+</a>
+<!-- Rubric -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 font-normal py-1 hover:text-slate-200 transition-colors duration-150 active:scale-95 transition-transform duration-100 group" href="#rubric">
+<span class="material-symbols-outlined text-2xl group-hover:text-slate-200" data-icon="tune">tune</span>
+<span class="font-label text-xs tracking-wide uppercase mt-0.5">Rubric</span>
+</a>
+<!-- Analytics -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 font-normal py-1 hover:text-slate-200 transition-colors duration-150 active:scale-95 transition-transform duration-100 group" href="#analytics">
+<span class="material-symbols-outlined text-2xl group-hover:text-slate-200" data-icon="analytics">analytics</span>
+<span class="font-label text-xs tracking-wide uppercase mt-0.5">Analytics</span>
+</a>
+<!-- Settings (Active) -->
+<a class="flex flex-col items-center justify-center text-emerald-200 dark:text-emerald-300 font-medium py-1 active:scale-95 transition-transform duration-100" href="#settings">
+<span class="material-symbols-outlined text-2xl" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label text-xs tracking-wide uppercase mt-0.5">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Inline Script for Micro-interactions (Key masking, Paste, Test connection) -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiKeyInput = document.getElementById('api-key-input');
+      const toggleVisibilityBtn = document.getElementById('toggle-visibility-btn');
+      const visibilityIcon = document.getElementById('visibility-icon');
+      const pasteBtn = document.getElementById('paste-btn');
+      const testConnectionBtn = document.getElementById('test-connection-btn');
+      const statusBadge = document.getElementById('status-badge');
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+
+      // Toggle API Key Mask
+      toggleVisibilityBtn.addEventListener('click', () => {
+        const isPassword = apiKeyInput.getAttribute('type') === 'password';
+        apiKeyInput.setAttribute('type', isPassword ? 'text' : 'password');
+        visibilityIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+        visibilityIcon.setAttribute('data-icon', isPassword ? 'visibility_off' : 'visibility');
+      });
+
+      // Handle Input Changes to activate buttons
+      apiKeyInput.addEventListener('input', () => {
+        updateKeyState();
+      });
+
+      function updateKeyState() {
+        const value = apiKeyInput.value.trim();
+        if (value.length > 8) {
+          testConnectionBtn.disabled = false;
+          testConnectionBtn.className = "w-full py-2.5 px-4 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-200 hover:text-white bg-slate-900/90 text-sm font-medium flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 active:scale-[0.99]";
+        } else {
+          testConnectionBtn.disabled = true;
+          testConnectionBtn.className = "w-full py-2.5 px-4 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-500 text-sm font-medium flex items-center justify-center gap-2 cursor-not-allowed transition-all duration-150";
+        }
+      }
+
+      // Paste action handler
+      pasteBtn.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            const text = await navigator.clipboard.readText();
+            apiKeyInput.value = text;
+            updateKeyState();
+          } else {
+            // Fallback mock paste for test/demo
+            apiKeyInput.value = 'AIzaSy' + Math.random().toString(36).substring(2, 15) + 'XyZ7';
+            updateKeyState();
+          }
+        } catch (err) {
+          apiKeyInput.value = 'AIzaSy' + Math.random().toString(36).substring(2, 15) + 'XyZ7';
+          updateKeyState();
+        }
+      });
+
+      // Test connection mock response
+      testConnectionBtn.addEventListener('click', () => {
+        testConnectionBtn.innerHTML = `
+          <span class="inline-block animate-spin material-symbols-outlined text-base" data-icon="progress_activity">progress_activity</span>
+          <span>Verifying with Google...</span>
+        `;
+        testConnectionBtn.disabled = true;
+
+        setTimeout(() => {
+          testConnectionBtn.innerHTML = `
+            <span class="material-symbols-outlined text-base text-emerald-300" data-icon="check_circle">check_circle</span>
+            <span class="text-emerald-200">Connection Verified</span>
+          `;
+          testConnectionBtn.className = "w-full py-2.5 px-4 rounded-xl border border-emerald-800/60 bg-emerald-950/20 text-emerald-200 text-sm font-medium flex items-center justify-center gap-2 transition-all";
+          
+          // Update Status pill
+          statusDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400";
+          statusText.textContent = "Verified";
+          statusBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/30 border border-emerald-800/40 text-[11px] font-mono text-emerald-300";
+        }, 800);
+      });
+    });
+  </script>
+</body></html>
