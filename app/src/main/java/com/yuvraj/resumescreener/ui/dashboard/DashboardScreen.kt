@@ -33,6 +33,7 @@ import com.yuvraj.resumescreener.ui.components.EmptyState
 import com.yuvraj.resumescreener.ui.components.ScoreBadge
 import com.yuvraj.resumescreener.ui.components.SectionLabel
 import com.yuvraj.resumescreener.ui.components.StatTile
+import com.yuvraj.resumescreener.ui.theme.AppTheme
 import com.yuvraj.resumescreener.ui.theme.TabularFamily
 import com.yuvraj.resumescreener.ui.theme.scoreColor
 import java.util.concurrent.TimeUnit
@@ -86,7 +87,7 @@ fun DashboardScreen(
                         value = s.averageScore?.let { String.format("%.1f", it) } ?: "—",
                         caption = if (s.averageScore == null) "no scores yet" else "across all roles",
                         modifier = Modifier.weight(1f),
-                        valueColor = s.averageScore?.let { scoreColor(it.toFloat()) },
+                        valueColor = s.averageScore?.let { scoreColor(it.toFloat(), AppTheme.isDark) },
                     )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -95,7 +96,7 @@ fun DashboardScreen(
                         value = s.bestScore?.let { String.format("%.1f", it) } ?: "—",
                         caption = "your top match",
                         modifier = Modifier.weight(1f),
-                        valueColor = s.bestScore?.let { scoreColor(it.toFloat()) },
+                        valueColor = s.bestScore?.let { scoreColor(it.toFloat(), AppTheme.isDark) },
                     )
                     StatTile(
                         label = "This week",

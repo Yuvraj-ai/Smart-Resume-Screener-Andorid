@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yuvraj.resumescreener.data.remote.GeminiException
+import com.yuvraj.resumescreener.domain.usecase.JobDescriptionFetcher
 import com.yuvraj.resumescreener.data.settings.SettingsRepository
 import com.yuvraj.resumescreener.domain.usecase.BatchEvent
 import com.yuvraj.resumescreener.domain.usecase.FileProgress
@@ -27,6 +28,7 @@ data class ScreenUiState(
     val running: Boolean = false,
     val error: String? = null,
     val missingKey: Boolean = false,
+    val fetchingJd: Boolean = false,
 ) {
     val canRun: Boolean get() = !running && files.isNotEmpty() && jobDescription.isNotBlank()
     val finished: Int get() = progress.values.count { it.stage == FileStage.DONE }
@@ -37,6 +39,7 @@ data class ScreenUiState(
 class ScreenViewModel @Inject constructor(
     private val pipeline: ScreeningPipeline,
     private val settings: SettingsRepository,
+    private val jdFetcher: JobDescriptionFetcher,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ScreenUiState())
@@ -59,6 +62,26 @@ class ScreenViewModel @Inject constructor(
     }
 
     fun dismissError() = _state.update { it.copy(error = null) }
+
+    /**
+     * Replace the job description with the contents of a link.
+     *
+     * On failure the existing text is left untouched, so a bad link never
+     * destroys work the user already pasted.
+     */
+    fun fetchJobDescription(url: String) {
+        if (_state.value.fetchingJd) return
+        viewModelScope.launch {
+            _state.update { it.copy(fetchingJd = true, error = null) }
+            runCatching { jdFetcher.fetch(url) }
+                .onSuccess { text ->
+                    _state.update { it.copy(jobDescription = text, fetchingJd = false) }
+                }
+                .onFailure { e ->
+                    _state.update { s -> s.copy(fetchingJd = false, error = e.message ?: "Could not read that link.") }
+                }
+        }
+    }
 
     fun run() {
         val snapshot = _state.value

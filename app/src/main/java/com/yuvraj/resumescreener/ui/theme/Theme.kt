@@ -2,13 +2,20 @@ package com.yuvraj.resumescreener.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 /**
- * The design system is dark-only: the palette is built on a deep ink base and
- * there is no designed light theme. Rather than ship a half-considered light
- * scheme, the app stays dark regardless of system setting.
+ * Dark is the original design. Light is derived from the same hue families in
+ * Color.kt, not inverted, so switching modes does not change the app's
+ * identity, only its contrast.
  */
 private val InkColorScheme = darkColorScheme(
     primary = Mint,
@@ -27,9 +34,10 @@ private val InkColorScheme = darkColorScheme(
     onSurface = TextPrimary,
     surfaceVariant = InkSecondary,
     onSurfaceVariant = TextMuted,
+    surfaceContainerLow = InkSecondary,
     surfaceContainer = InkCard,
     surfaceContainerHigh = InkPopover,
-    surfaceContainerLow = InkSecondary,
+    surfaceContainerHighest = InkPopover,
     outline = InkBorder,
     outlineVariant = InkMuted,
     error = Danger,
@@ -37,15 +45,59 @@ private val InkColorScheme = darkColorScheme(
     scrim = Ink,
 )
 
+private val PaperColorScheme = lightColorScheme(
+    primary = MintDeep,
+    onPrimary = MintDeepInk,
+    primaryContainer = MintWash,
+    onPrimaryContainer = Color(0xFF00281D),
+    secondary = PaperTextSecondary,
+    onSecondary = Color.White,
+    secondaryContainer = PaperMuted,
+    onSecondaryContainer = PaperTextPrimary,
+    tertiary = AmberDeep,
+    onTertiary = Color.White,
+    background = Paper,
+    onBackground = PaperTextPrimary,
+    surface = Paper,
+    onSurface = PaperTextPrimary,
+    surfaceVariant = PaperInput,
+    onSurfaceVariant = PaperTextMuted,
+    surfaceContainerLow = PaperInput,
+    surfaceContainer = PaperCard,
+    surfaceContainerHigh = PaperRaised,
+    surfaceContainerHighest = PaperMuted,
+    outline = PaperBorder,
+    outlineVariant = PaperBorder,
+    error = DangerDeep,
+    onError = Color.White,
+    scrim = Color(0x66000000),
+)
+
+/**
+ * Exposes the active mode so score colours can pick the right ramp.
+ *
+ * The score spectrum is the app's only data visualization, and the dark ramp's
+ * mid-tones wash out on paper, so it genuinely needs to differ per mode.
+ */
+val LocalIsDarkTheme = staticCompositionLocalOf { true }
+
+object AppTheme {
+    val isDark: Boolean
+        @Composable @ReadOnlyComposable
+        get() = LocalIsDarkTheme.current
+}
+
 @Composable
 fun ResumeScreenerTheme(
-    @Suppress("UNUSED_PARAMETER") darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = InkColorScheme,
-        typography = AppTypography,
-        shapes = AppShapes,
-        content = content,
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) InkColorScheme else PaperColorScheme,
+            typography = AppTypography,
+            shapes = AppShapes,
+            content = content,
+        )
+    }
 }

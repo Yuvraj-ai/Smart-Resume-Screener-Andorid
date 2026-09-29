@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.yuvraj.resumescreener.ui.theme.AppTheme
 import com.yuvraj.resumescreener.ui.theme.TabularFamily
 import com.yuvraj.resumescreener.ui.theme.scoreColor
 import kotlin.math.roundToInt
@@ -52,7 +53,7 @@ fun ScoreBadge(
     modifier: Modifier = Modifier,
     diameter: Int = 56,
 ) {
-    val color = scoreColor(score.toFloat())
+    val color = scoreColor(score.toFloat(), AppTheme.isDark)
     val shown = if (score % 1.0 == 0.0) score.roundToInt().toString()
     else String.format("%.1f", score)
     Box(
@@ -75,7 +76,7 @@ fun ScoreBadge(
 /** Headline score with the unit subordinate, for the detail screen. */
 @Composable
 fun ScoreHeader(score: Double, outOf: Int = 10, modifier: Modifier = Modifier) {
-    val color = scoreColor(score.toFloat())
+    val color = scoreColor(score.toFloat(), AppTheme.isDark)
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         Text(
             text = String.format("%.1f", score),
@@ -139,7 +140,7 @@ fun WeightedScoreBar(
     modifier: Modifier = Modifier,
     max: Int = 10,
 ) {
-    val color = scoreColor(score.toFloat())
+    val color = scoreColor(score.toFloat(), AppTheme.isDark)
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             Modifier.fillMaxWidth(),
@@ -187,7 +188,7 @@ fun DistributionBar(
     isPeak: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val color = scoreColor(band.toFloat())
+    val color = scoreColor(band.toFloat(), AppTheme.isDark)
     Column(
         modifier = modifier
             .clearAndSetSemantics {

@@ -43,6 +43,7 @@ import com.yuvraj.resumescreener.BuildConfig
 import com.yuvraj.resumescreener.data.settings.KeyStatus
 import com.yuvraj.resumescreener.data.settings.SettingsRepository
 import com.yuvraj.resumescreener.ui.components.SectionLabel
+import com.yuvraj.resumescreener.ui.theme.AppTheme
 import com.yuvraj.resumescreener.ui.theme.TabularFamily
 import com.yuvraj.resumescreener.ui.theme.scoreColor
 
@@ -153,7 +154,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                     text = testDetail,
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = TabularFamily),
                     color = when (state.test) {
-                        TestState.PASSED -> scoreColor(9f)
+                        TestState.PASSED -> scoreColor(9f, AppTheme.isDark)
                         TestState.FAILED -> MaterialTheme.colorScheme.error
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
@@ -237,8 +238,8 @@ private fun SettingsCard(content: @Composable () -> Unit) {
 private fun StatusPill(status: KeyStatus) {
     val (label, color) = when (status) {
         KeyStatus.MISSING -> "Not configured" to MaterialTheme.colorScheme.onSurfaceVariant
-        KeyStatus.UNVERIFIED -> "Saved" to scoreColor(6f)
-        KeyStatus.VERIFIED -> "Verified" to scoreColor(9f)
+        KeyStatus.UNVERIFIED -> "Saved" to scoreColor(6f, AppTheme.isDark)
+        KeyStatus.VERIFIED -> "Verified" to scoreColor(9f, AppTheme.isDark)
     }
     Row(
         Modifier

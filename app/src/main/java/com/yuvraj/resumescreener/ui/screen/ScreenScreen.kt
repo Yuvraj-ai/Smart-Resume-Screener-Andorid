@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +32,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -88,6 +92,17 @@ fun ScreenScreen(
             }
         }
 
+        state.error?.let { message ->
+            item {
+                NoticeCard(
+                    text = message,
+                    isError = true,
+                    actionLabel = "Dismiss",
+                    onAction = viewModel::dismissError,
+                )
+            }
+        }
+
         if (state.missingKey) {
             item {
                 NoticeCard(
@@ -100,9 +115,42 @@ fun ScreenScreen(
         }
 
         item {
+            var link by remember { mutableStateOf("") }
             Column {
                 SectionLabel("Job description")
                 Spacer(Modifier.height(8.dp))
+
+                // Link is additive, not a replacement: pasting text still works.
+                OutlinedTextField(
+                    value = link,
+                    onValueChange = { link = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Or paste a link to the posting") },
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.medium,
+                    trailingIcon = {
+                        if (state.fetchingJd) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            IconButton(
+                                onClick = { viewModel.fetchJobDescription(link); link = "" },
+                                enabled = link.isNotBlank(),
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Download,
+                                    contentDescription = "Fetch job description from link",
+                                )
+                            }
+                        }
+                    },
+                )
+
+                Spacer(Modifier.height(10.dp))
+
                 OutlinedTextField(
                     value = state.jobDescription,
                     onValueChange = viewModel::onJobDescriptionChange,
@@ -112,6 +160,15 @@ fun ScreenScreen(
                     placeholder = { Text("Paste the full job description here") },
                     shape = MaterialTheme.shapes.medium,
                 )
+
+                if (state.jobDescription.isNotBlank()) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "${state.jobDescription.length} characters",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
 
