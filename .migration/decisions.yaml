@@ -1,0 +1,146 @@
+# User-approved product and architecture decisions.
+# Every entry is `pending` until answered in Phase 2. Nothing in Phase 4 may
+# begin while any `blocking: true` entry is unresolved.
+
+meta:
+  source_repo: /home/imyuvi/projects/Smart-Resume-Screener
+  target_repo: /home/imyuvi/projects/ResumeScreener-Android
+  opened: 2026-09-30
+  status: awaiting_user_review
+
+decisions:
+
+  - id: d1_audience
+    question: >
+      Who is this app for? This changes the correct answer to the API-key
+      question, so it is asked first rather than inferred.
+    options:
+      - Personal tool, single user, own key
+      - Small internal team, shared deployment
+      - Distributed to many users
+    recommendation: Personal tool, single user, own key
+    rationale: >
+      On-device key storage is only acceptable when the key belongs to the
+      people running the app. See security.md section 2.
+    blocking: true
+    status: pending
+    answer: null
+
+  - id: d2_gemini_execution
+    question: >
+      Should the Android app call the Gemini REST API directly from the device,
+      or should a Python backend do it?
+    options:
+      - On-device, direct Gemini REST calls, key entered in Settings
+      - Python backend, app talks to it over HTTPS
+    recommendation: On-device, direct Gemini REST calls, key entered in Settings
+    rationale: >
+      This is what the user asked for, and it needs no server. LangGraph and
+      LangChain cannot run on Android either way, so the three-node pipeline is
+      a Kotlin reimplementation regardless; the backend option would only move
+      where it runs, at the cost of hosting.
+    blocking: true
+    status: pending
+    answer: null
+
+  - id: d3_storage
+    question: >
+      Where should results be stored? Note that Android cannot speak the
+      MongoDB wire protocol, so "Mongo in the app" needs a real decision.
+    options:
+      - Local Room only (no database credential needed at all)
+      - Local Room by default, plus optional MongoDB Atlas Data API sync
+      - Local Room plus a deployed Python backend for shared storage
+    recommendation: Local Room by default, plus optional Mongo sync later
+    rationale: >
+      The source app already falls back to SQLite when MONGODB_URI is absent,
+      so local-first is its own established behavior. See security.md section 3
+      for why direct Mongo from Android is a hard blocker.
+    blocking: true
+    status: pending
+    answer: null
+
+  - id: d4_navigation
+    question: >
+      Confirm the section structure. The source is a single Streamlit page; you
+      asked for a dashboard with each important area in its own section.
+    proposal:
+      - Dashboard: aggregate stats, recent activity, top matches
+      - Screen: pick PDFs, paste JD, run, per-file progress
+      - Candidates: searchable list of stored results
+      - Candidate detail: its own window with score, summary, parsed resume, JD
+      - Settings: API key, storage backend, model choice
+    recommendation: As proposed
+    blocking: false
+    status: pending
+    answer: null
+
+  - id: d5_dashboard_stats
+    question: >
+      Which aggregate statistics belong on the dashboard? None of these exist in
+      the source app, so they are additions rather than preserved behavior.
+    options:
+      - Total screened, average score, score distribution, top matches, recent activity
+      - A smaller subset
+    recommendation: Total screened, average score, score distribution, top matches, recent activity
+    blocking: false
+    status: pending
+    answer: null
+
+  - id: d6_model_choice
+    question: >
+      Keep the source's split models, or use one model everywhere?
+    options:
+      - Keep source split: gemini-2.5-flash to parse, gemini-2.5-pro to score
+      - Single model for all three nodes
+      - Make the model user-selectable in Settings
+    recommendation: Keep source split, and make it user-selectable in Settings
+    rationale: >
+      Parsing is cheap and scoring benefits from the stronger model. Exposing
+      the choice in Settings is a small addition that also makes the app usable
+      if a model is retired.
+    blocking: false
+    status: pending
+    answer: null
+
+  - id: d7_scoring_breakdown
+    question: >
+      The rubric weights (skills 60 / experience 30 / education 10) exist only
+      in prompt text. Show a per-criterion breakdown in the UI?
+    options:
+      - No, keep the single 1-10 score and summary as the source does
+      - Yes, extend the schema to return per-criterion sub-scores
+    recommendation: Yes, as an explicit addition
+    rationale: >
+      This changes the LLM output contract, so it is a real behavior change
+      rather than a UI tweak. Worth it for a dashboard, but it is your call.
+    blocking: false
+    status: pending
+    answer: null
+
+  - id: d8_bulk_actions
+    question: >
+      Should candidates support search/filter, delete, and re-screen against a
+      new job description? None exist in the source app.
+    options:
+      - Search and filter only
+      - Search, filter, and delete
+      - Search, filter, delete, and re-screen
+    recommendation: Search, filter, and delete
+    blocking: false
+    status: pending
+    answer: null
+
+  - id: d9_advanced_android
+    question: >
+      Any Android-native capabilities beyond the core flow? The skill asks only
+      about ones that are actually relevant here.
+    options:
+      - Share a PDF into the app to screen it
+      - Background screening with a notification on completion
+      - Export results as CSV or JSON
+      - None of these
+    recommendation: Share-into-app and CSV export
+    blocking: false
+    status: pending
+    answer: null

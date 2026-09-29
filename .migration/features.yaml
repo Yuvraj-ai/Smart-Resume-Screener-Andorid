@@ -1,0 +1,369 @@
+# Feature inventory. All actions are `pending` until the user classifies them
+# in Phase 2. `current_behavior` is observed from source, not inferred.
+
+features:
+
+  # ---------- Core screening pipeline ----------
+  - id: multi_pdf_upload
+    name: Multi-PDF resume upload
+    source:
+      files: [app.py, backend/screening.py]
+      technology: streamlit
+    current_behavior: >
+      User selects one or more PDFs. Each is written to a private temp dir under a
+      fixed name (never the client-supplied filename, for traversal safety), then
+      text-extracted. An empty selection is a no-op.
+    migration:
+      action: pending
+      android:
+        screen: screen
+        implementation: native_compose
+      backend:
+        required: false
+        operations: []
+      changes:
+        - SAF document picker with persistable URI permission
+        - PDF text extraction via PDFBox-Android instead of PyMuPDF
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: jd_text_input
+    name: Job description input
+    source:
+      files: [app.py]
+      technology: streamlit
+    current_behavior: Single free-text job description shared by every resume in the batch.
+    migration:
+      action: pending
+      android:
+        screen: screen
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes: []
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: resume_structured_extraction
+    name: Resume structured extraction
+    source:
+      files: [backend/nodes/parse_resume_node.py, backend/graph.py]
+      technology: python
+    current_behavior: >
+      gemini-2.5-flash, temperature 0, structured output into an 8-field schema:
+      name, email, githublink, linkedinlink, phone, skills, education, experience,
+      projects. All fields are strings. phone is a string so leading zeros and
+      country codes survive.
+    migration:
+      action: pending
+      android:
+        screen: candidate_detail
+        implementation: native_compose
+      backend: { required: false, operations: [gemini_generate_content] }
+      changes:
+        - langchain with_structured_output replaced by Gemini responseSchema
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: jd_structured_extraction
+    name: Job description structured extraction
+    source:
+      files: [backend/nodes/parse_jd_node.py, backend/graph.py]
+      technology: python
+    current_behavior: >
+      gemini-2.5-flash, temperature 0, structured output into job_title,
+      skills_reqd, experience_reqd, edu_reqd, responsibilities.
+    migration:
+      action: pending
+      android:
+        screen: candidate_detail
+        implementation: native_compose
+      backend: { required: false, operations: [gemini_generate_content] }
+      changes:
+        - langchain with_structured_output replaced by Gemini responseSchema
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: match_scoring
+    name: Match scoring and justification
+    source:
+      files: [backend/nodes/match_score_node.py, backend/graph.py]
+      technology: python
+    current_behavior: >
+      gemini-2.5-pro, temperature 0. A ~60-line rubric weights skills 60%,
+      experience 30%, education 10%, scores 1-10, and instructs the model not to
+      infer missing data. Returns score (float) plus a 2-4 sentence summary.
+      Weights exist only in prompt text; no code exposes a sub-score breakdown.
+    migration:
+      action: pending
+      android:
+        screen: candidate_detail
+        implementation: native_compose
+      backend: { required: false, operations: [gemini_generate_content] }
+      changes:
+        - prompt preserved verbatim
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: batch_partial_failure
+    name: Per-file error isolation
+    source:
+      files: [backend/screening.py]
+      technology: python
+    current_behavior: >
+      A failing PDF is recorded as (filename, reason) and the batch continues.
+      Successful results in the same batch are still shown and persisted.
+    migration:
+      action: pending
+      android:
+        screen: screen
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - progress and per-file outcome surfaced in the UI
+    user_decision:
+      status: pending
+      decision: null
+
+  # ---------- Persistence ----------
+  - id: local_persistence
+    name: Local result storage
+    source:
+      files: [backend/utils/db.py]
+      technology: python
+    current_behavior: >
+      Without MONGODB_URI, results persist to a local candidates.db via SQLite,
+      each document stored as JSON in one TEXT column so the schemaless shape is
+      preserved. The active backend is shown in the UI.
+    migration:
+      action: pending
+      android:
+        screen: dashboard
+        implementation: native_android
+      backend: { required: false, operations: [] }
+      changes:
+        - Room over SQLite, with typed columns for the fields the UI actually queries
+        - raw JSON retained so nothing is lost if the schema evolves
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: mongodb_persistence
+    name: MongoDB Atlas storage
+    source:
+      files: [backend/utils/db.py]
+      technology: python
+    current_behavior: >
+      When MONGODB_URI is set, documents go to Atlas db resume_screener,
+      collection candidates. Otherwise SQLite is used.
+    migration:
+      action: pending
+      android:
+        screen: settings
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - NOTE: an app cannot speak the MongoDB wire protocol; a Data API / REST
+          endpoint or a small proxy would be required. This is the single largest
+          scope risk in the migration and is raised in security.md.
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: candidates_dashboard
+    name: Candidates dashboard
+    source:
+      files: [app.py]
+      technology: streamlit
+    current_behavior: >
+      Flat chronological list of every stored result. Each row shows index,
+      candidate name, applied-for job title, and a score metric. An expander
+      reveals the summary plus raw candidate and job JSON. A Refresh Data button
+      clears the Streamlit cache.
+    migration:
+      action: pending
+      android:
+        screen: dashboard
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - user requested aggregate dashboard information, which the Streamlit
+          version does not provide. Aggregate stats are therefore an ADD, not a
+          preserve. See added_features below.
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: full_analysis_expander
+    name: Full analysis detail view
+    source:
+      files: [app.py]
+      technology: streamlit
+    current_behavior: >
+      Collapsed per-candidate section with match summary, candidate details, and
+      job details as raw JSON.
+    migration:
+      action: pending
+      android:
+        screen: candidate_detail
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - becomes its own navigation destination rather than an inline expander
+    user_decision:
+      status: pending
+      decision: null
+
+  # ---------- Configuration ----------
+  - id: settings_api_key
+    name: Gemini API key entry in settings
+    source:
+      files: [backend/nodes/*.py]
+      technology: python
+    current_behavior: >
+      Read from GOOGLE_API_KEY in the environment or .env. There is no UI for it;
+      the Streamlit app has no settings surface at all.
+    migration:
+      action: pending
+      android:
+        screen: settings
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - user explicitly requested a settings screen for this
+        - MUST be stored via Android Keystore-backed encryption, never plaintext
+        - trust-boundary consequences documented in security.md
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: settings_mongo_uri
+    name: Mongo URI entry in settings
+    source:
+      files: [backend/utils/db.py]
+      technology: python
+    current_behavior: Read from MONGODB_URI in the environment; optional.
+    migration:
+      action: pending
+      android:
+        screen: settings
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - user explicitly requested a settings screen for this
+        - holds database credentials; see security.md
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: storage_backend_label
+    name: Active storage backend indicator
+    source:
+      files: [app.py, backend/utils/db.py]
+      technology: python
+    current_behavior: Dashboard caption naming the backend in use.
+    migration:
+      action: pending
+      android:
+        screen: dashboard
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes: []
+    user_decision:
+      status: pending
+      decision: null
+
+  # ---------- Capabilities the source does NOT have ----------
+  # Listed separately so they are not mistaken for preserved behavior.
+  - id: aggregate_dashboard_stats
+    name: Aggregate dashboard statistics
+    source:
+      files: []
+      technology: other
+    current_behavior: NOT PRESENT in the source app.
+    migration:
+      action: pending
+      android:
+        screen: dashboard
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - total screened, average score, score distribution, top matches,
+          recent activity. Requested by the user.
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: sectioned_navigation
+    name: Sectioned navigation with dedicated windows
+    source:
+      files: []
+      technology: other
+    current_behavior: NOT PRESENT. The source is a single Streamlit page.
+    migration:
+      action: pending
+      android:
+        screen: null
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes:
+        - bottom navigation across Dashboard / Screen / Candidates / Settings
+        - requested by the user
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: candidate_search_filter
+    name: Candidate search and filtering
+    source:
+      files: []
+      technology: other
+    current_behavior: NOT PRESENT.
+    migration:
+      action: pending
+      android:
+        screen: candidates
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes: []
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: result_deletion
+    name: Delete a stored screening result
+    source:
+      files: []
+      technology: other
+    current_behavior: NOT PRESENT. Records are append-only in the source app.
+    migration:
+      action: pending
+      android:
+        screen: candidate_detail
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes: []
+    user_decision:
+      status: pending
+      decision: null
+
+  - id: re_screen_existing
+    name: Re-screen a stored result against a new JD
+    source:
+      files: []
+      technology: other
+    current_behavior: NOT PRESENT.
+    migration:
+      action: pending
+      android:
+        screen: candidate_detail
+        implementation: native_compose
+      backend: { required: false, operations: [] }
+      changes: []
+    user_decision:
+      status: pending
+      decision: null
