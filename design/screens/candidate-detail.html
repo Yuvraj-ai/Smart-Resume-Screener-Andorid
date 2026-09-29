@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CandidateDetail</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full,
+      .rounded-none,
+      .rounded-t-full,
+      .rounded-t-none,
+      .rounded-r-full,
+      .rounded-r-none,
+      .rounded-b-full,
+      .rounded-b-none,
+      .rounded-l-full,
+      .rounded-l-none,
+      .rounded-s-full,
+      .rounded-s-none,
+      .rounded-e-full,
+      .rounded-e-none,
+      .rounded-tl-full,
+      .rounded-tl-none,
+      .rounded-tr-full,
+      .rounded-tr-none,
+      .rounded-bl-full,
+      .rounded-bl-none,
+      .rounded-br-full,
+      .rounded-br-none,
+      .rounded-ss-full,
+      .rounded-ss-none,
+      .rounded-se-full,
+      .rounded-se-none,
+      .rounded-es-full,
+      .rounded-es-none,
+      .rounded-ee-full,
+      .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+        --background: #10151c;
+        --foreground: #e8edf2;
+        --primary: #a7f3d0;
+        --primary-foreground: #0b1915;
+        --secondary: #1b242e;
+        --secondary-foreground: #d6dee7;
+        --muted: #27313c;
+        --muted-foreground: #91a0af;
+        --accent: #f2b84b;
+        --accent-foreground: #231a08;
+        --destructive: #e57373;
+        --card: #161d25;
+        --card-foreground: #e8edf2;
+        --popover: #1c2630;
+        --popover-foreground: #e8edf2;
+        --border: #2b3743;
+        --input: #1a232c;
+        --ring: #a7f3d0;
+        --chart-1: #c86b6b;
+        --chart-2: #d99453;
+        --chart-3: #e6b85c;
+        --chart-4: #82b879;
+        --chart-5: #4fae7d;
+
+        --font-sans: "Inter";
+        --font-heading: "Inter";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 1.25rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      style="font-variant-numeric: tabular-nums"
+      class="min-h-screen bg-background text-foreground pb-24"
+    >
+      <header
+        class="sticky top-0 z-20 bg-background/95 backdrop-blur px-6 py-4 border-b border-border flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            class="size-10 rounded-2xl border border-border bg-card flex items-center justify-center text-muted-foreground"
+            aria-label="Back to candidate list"
+          >
+            <iconify-icon
+              icon="ph:arrow-left"
+              class="text-foreground"
+              width="20"
+              height="20"
+            ></iconify-icon>
+          </button>
+          <div>
+            <p class="text-xs text-muted-foreground">Candidate evaluation</p>
+            <h1 class="font-heading text-base font-semibold">Marcus Chen</h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            class="size-10 rounded-2xl border border-border bg-card flex items-center justify-center text-muted-foreground"
+            aria-label="Share evaluation"
+          >
+            <iconify-icon icon="ph:export" width="20" height="20"></iconify-icon></button
+          ><button
+            class="size-10 rounded-2xl border border-destructive/30 bg-destructive/10 flex items-center justify-center text-destructive"
+            aria-label="Delete candidate"
+          >
+            <iconify-icon icon="ph:trash" width="20" height="20"></iconify-icon>
+          </button>
+        </div>
+      </header>
+      <section class="px-6 pt-6">
+        <div class="rounded-3xl border border-border bg-card p-6">
+          <div class="flex items-start justify-between">
+            <span class="text-xs font-semibold tracking-[0.16em] uppercase text-muted-foreground"
+              >Overall fit score</span
+            ><span class="text-xs px-2.5 py-1 rounded-full bg-chart-5/15 text-chart-5 font-semibold"
+              >Top 5% Match</span
+            >
+          </div>
+          <div class="mt-4 flex items-baseline gap-2">
+            <span class="font-heading text-6xl font-bold tracking-tight text-chart-5">8.8</span
+            ><span class="text-xl text-muted-foreground font-medium">/ 10.0</span>
+          </div>
+          <p class="text-xs text-muted-foreground mt-2">
+            Target Role: Staff Product Designer, Core Experience
+          </p>
+          <div class="mt-6 pt-6 border-t border-border space-y-4">
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-medium text-foreground">Skills match (60% weight)</span
+                ><span class="font-semibold text-chart-5">9.2 / 10</span>
+              </div>
+              <div class="h-2 rounded-full bg-muted overflow-hidden flex">
+                <div style="width: 92%" class="h-full bg-chart-5 rounded-full"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-medium text-foreground">Experience depth (30% weight)</span
+                ><span class="font-semibold text-chart-4">8.5 / 10</span>
+              </div>
+              <div class="h-2 rounded-full bg-muted overflow-hidden flex">
+                <div style="width: 85%" class="h-full bg-chart-4 rounded-full"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-medium text-foreground"
+                  >Education &amp; credentials (10% weight)</span
+                ><span class="font-semibold text-chart-4">7.5 / 10</span>
+              </div>
+              <div class="h-2 rounded-full bg-muted overflow-hidden flex">
+                <div style="width: 75%" class="h-full bg-chart-4 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="px-6 mt-6 space-y-3">
+        <h2
+          class="font-heading text-sm font-semibold tracking-wide uppercase text-muted-foreground"
+        >
+          Match justification
+        </h2>
+        <div class="rounded-3xl border border-border bg-card p-5">
+          <p class="text-sm leading-relaxed text-secondary-foreground">
+            Marcus demonstrates direct and rigorous alignment with all Tier-1 requirements. Over 9
+            years in product design leadership, including 4 years maintaining a multi-brand token
+            system used across 12 product squads. Strong proficiency in HTML/React prototyping,
+            Figma Variables, and direct cross-functional alignment with engineering leadership. His
+            recent tenure led design workflows for an AI-assisted analytics tool, satisfying both
+            domain and system-level seniority expectations.
+          </p>
+          <div class="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded-2xl bg-secondary/50 border border-border/60">
+              <span class="text-chart-5 font-semibold block mb-1">Key Strengths</span>Design systems
+              at enterprise scale, coded prototypes, cross-functional leadership
+            </div>
+            <div class="p-3 rounded-2xl bg-secondary/50 border border-border/60">
+              <span class="text-accent font-semibold block mb-1">Observations</span>Primary
+              experience is desktop B2B; native Android depth was less emphasized.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="px-6 mt-6 space-y-3">
+        <h2
+          class="font-heading text-sm font-semibold tracking-wide uppercase text-muted-foreground"
+        >
+          Parsed candidate profile
+        </h2>
+        <div class="rounded-3xl border border-border bg-card p-5 space-y-4">
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span class="text-muted-foreground block">Email</span
+              ><span class="font-medium text-foreground mt-0.5 block"
+                >marcus.chen@fastmail.com</span
+              >
+            </div>
+            <div>
+              <span class="text-muted-foreground block">Phone</span
+              ><span class="font-medium text-foreground mt-0.5 block">+1 (415) 890-2134</span>
+            </div>
+            <div>
+              <span class="text-muted-foreground block">Location</span
+              ><span class="font-medium text-foreground mt-0.5 block">San Francisco, CA</span>
+            </div>
+            <div>
+              <span class="text-muted-foreground block">Portfolio / Links</span
+              ><span class="font-medium text-primary mt-0.5 block">marcuschen.design</span>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-border">
+            <span class="text-xs text-muted-foreground block mb-2">Extracted Core Skills</span>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="px-2.5 py-1 rounded-xl bg-secondary text-xs text-foreground font-medium"
+                >Design Systems</span
+              ><span class="px-2.5 py-1 rounded-xl bg-secondary text-xs text-foreground font-medium"
+                >Design Tokens</span
+              ><span class="px-2.5 py-1 rounded-xl bg-secondary text-xs text-foreground font-medium"
+                >Figma</span
+              ><span class="px-2.5 py-1 rounded-xl bg-secondary text-xs text-foreground font-medium"
+                >React / TypeScript</span
+              ><span class="px-2.5 py-1 rounded-xl bg-secondary text-xs text-foreground font-medium"
+                >User Research</span
+              ><span class="px-2.5 py-1 rounded-xl bg-secondary text-xs text-foreground font-medium"
+                >Workflow IA</span
+              >
+            </div>
+          </div>
+          <div class="pt-3 border-t border-border space-y-3">
+            <span class="text-xs text-muted-foreground block">Experience Summary</span>
+            <div class="text-xs space-y-2">
+              <div class="p-3 rounded-2xl bg-secondary/30 border border-border/40">
+                <p class="font-semibold text-foreground">Lead Product Designer · ScaleWorks Inc.</p>
+                <p class="text-muted-foreground mt-0.5">2021 — Present (3 yrs 4 mos)</p>
+                <p class="mt-1.5 text-secondary-foreground leading-relaxed">
+                  Built and governed design tokens across web and internal consoles, speeding sprint
+                  delivery by 28%.
+                </p>
+              </div>
+              <div class="p-3 rounded-2xl bg-secondary/30 border border-border/40">
+                <p class="font-semibold text-foreground">
+                  Senior Interaction Designer · Omnidata Labs
+                </p>
+                <p class="text-muted-foreground mt-0.5">2018 — 2021 (3 yrs)</p>
+                <p class="mt-1.5 text-secondary-foreground leading-relaxed">
+                  Redesigned complex data pipeline orchestration tooling for enterprise data
+                  engineers.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-border">
+            <span class="text-xs text-muted-foreground block mb-2">Education</span>
+            <div class="text-xs">
+              <p class="font-semibold text-foreground">B.S. in Human-Computer Interaction</p>
+              <p class="text-muted-foreground mt-0.5">University of Washington · 2014 — 2018</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="px-6 mt-6 space-y-3">
+        <h2
+          class="font-heading text-sm font-semibold tracking-wide uppercase text-muted-foreground"
+        >
+          Parsed job requirements
+        </h2>
+        <div class="rounded-3xl border border-border bg-card p-5 space-y-3 text-xs">
+          <div class="flex items-start justify-between pb-2 border-b border-border">
+            <div>
+              <p class="font-semibold text-foreground">Target Role</p>
+              <p class="text-muted-foreground mt-0.5">Staff Product Designer</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground font-medium"
+              >7+ yrs required</span
+            >
+          </div>
+          <div>
+            <p class="font-semibold text-foreground mb-1">Required Competencies</p>
+            <ul class="list-disc list-inside space-y-1 text-secondary-foreground">
+              <li>Enterprise design systems &amp; token architectures</li>
+              <li>Prototyping in code / advanced tooling</li>
+              <li>Cross-functional alignment with engineering and AI units</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section class="px-6 mt-6 mb-8">
+        <details class="rounded-3xl border border-border bg-card p-5 group">
+          <summary
+            class="text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer list-none flex items-center justify-between"
+          >
+            <span>Raw stored JSON data</span
+            ><iconify-icon
+              icon="ph:caret-down"
+              class="text-muted-foreground group-open:rotate-180 transition"
+              width="16"
+              height="16"
+            ></iconify-icon>
+          </summary>
+          <pre
+            class="mt-4 p-3.5 rounded-2xl bg-background border border-border text-[11px] font-mono text-muted-foreground overflow-x-auto leading-relaxed"
+          >
+{
+  "id": "cand_8f492b",
+  "score": 8.8,
+  "breakdown": {
+  "skills": 0.92,
+  "experience": 0.85,
+  "education": 0.75
+  },
+  "rubric_weights": {
+  "skills": 0.60,
+  "experience": 0.30,
+  "education": 0.10
+  },
+  "candidate": {
+  "name": "Marcus Chen",
+  "email": "marcus.chen@fastmail.com",
+  "years_experience": 9
+  },
+  "timestamp": "2024-10-14T09:42:00Z"
+  }</pre
+          >
+        </details>
+      </section>
+    </main>
+  </body>
+</html>

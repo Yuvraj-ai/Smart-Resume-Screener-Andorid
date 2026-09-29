@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full,
+      .rounded-none,
+      .rounded-t-full,
+      .rounded-t-none,
+      .rounded-r-full,
+      .rounded-r-none,
+      .rounded-b-full,
+      .rounded-b-none,
+      .rounded-l-full,
+      .rounded-l-none,
+      .rounded-s-full,
+      .rounded-s-none,
+      .rounded-e-full,
+      .rounded-e-none,
+      .rounded-tl-full,
+      .rounded-tl-none,
+      .rounded-tr-full,
+      .rounded-tr-none,
+      .rounded-bl-full,
+      .rounded-bl-none,
+      .rounded-br-full,
+      .rounded-br-none,
+      .rounded-ss-full,
+      .rounded-ss-none,
+      .rounded-se-full,
+      .rounded-se-none,
+      .rounded-es-full,
+      .rounded-es-none,
+      .rounded-ee-full,
+      .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+        --background: #10151c;
+        --foreground: #e8edf2;
+        --primary: #a7f3d0;
+        --primary-foreground: #0b1915;
+        --secondary: #1b242e;
+        --secondary-foreground: #d6dee7;
+        --muted: #27313c;
+        --muted-foreground: #91a0af;
+        --accent: #f2b84b;
+        --accent-foreground: #231a08;
+        --destructive: #e57373;
+        --card: #161d25;
+        --card-foreground: #e8edf2;
+        --popover: #1c2630;
+        --popover-foreground: #e8edf2;
+        --border: #2b3743;
+        --input: #1a232c;
+        --ring: #a7f3d0;
+        --chart-1: #c86b6b;
+        --chart-2: #d99453;
+        --chart-3: #e6b85c;
+        --chart-4: #82b879;
+        --chart-5: #4fae7d;
+
+        --font-sans: "Inter";
+        --font-heading: "Inter";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 1.25rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      style="font-variant-numeric: tabular-nums"
+      class="min-h-screen bg-background text-foreground pb-28"
+    >
+      <header class="px-6 pt-8 pb-6 flex items-start justify-between">
+        <div>
+          <p class="text-xs font-semibold tracking-[0.16em] uppercase text-muted-foreground">
+            Screening batch
+          </p>
+          <h1 class="font-heading text-[28px] leading-tight font-semibold tracking-[-0.03em] mt-2">
+            New screening
+          </h1>
+          <p class="text-sm text-muted-foreground mt-2">
+            Paste job details and attach candidate resumes.
+          </p>
+        </div>
+        <span
+          class="text-xs px-2.5 py-1 rounded-full border border-border bg-card text-muted-foreground font-medium"
+          >3 files ready</span
+        >
+      </header>
+      <section class="px-6 space-y-6">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label
+              for="jd"
+              class="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+              >Job description</label
+            ><span class="text-xs text-muted-foreground">Parsed automatically</span>
+          </div>
+          <div
+            class="rounded-3xl border border-border bg-card p-4 focus-within:border-primary/60 transition"
+          >
+            <textarea
+              id="jd"
+              rows="5"
+              class="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 resize-none focus:outline-none leading-relaxed"
+              placeholder="Paste the complete job description here, including responsibilities, required skills, and level..."
+            >
+Staff Product Designer, Core Experience
+  We are looking for a Staff Product Designer to lead design systems and complex candidate evaluation workflows across our core platform.
+  Requirements:
+  - 7+ years product design experience with enterprise or complex workflows
+  - Deep systems thinking, prototyping in code or advanced Figma tokens
+  - Experience collaborating directly with engineering and AI product teams</textarea
+            >
+            <div
+              class="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground"
+            >
+              <span>Role: Staff Product Designer</span><span>~148 words</span>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+              >Candidate resumes</span
+            ><span class="text-xs text-muted-foreground">PDF only</span>
+          </div>
+          <button
+            class="w-full h-14 rounded-2xl border border-dashed border-border bg-card/60 hover:bg-card flex items-center justify-center gap-2 text-sm font-medium text-foreground transition"
+          >
+            <iconify-icon icon="ph:plus" class="text-primary" width="16" height="16"></iconify-icon
+            >Pick PDF files (max 10)
+          </button>
+          <div class="space-y-2.5">
+            <div
+              class="rounded-2xl border border-border bg-card p-3.5 flex items-center justify-between gap-3"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="size-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shrink-0"
+                >
+                  <iconify-icon
+                    icon="ph:file-pdf"
+                    class="text-chart-1"
+                    width="20"
+                    height="20"
+                  ></iconify-icon>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium truncate">Marcus_Chen_Staff_Designer.pdf</p>
+                  <p class="text-xs text-muted-foreground">342 KB · Ready</p>
+                </div>
+              </div>
+              <button
+                class="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive"
+                aria-label="Remove Marcus_Chen_Staff_Designer.pdf"
+              >
+                <iconify-icon icon="ph:x" width="16" height="16"></iconify-icon>
+              </button>
+            </div>
+            <div
+              class="rounded-2xl border border-border bg-card p-3.5 flex items-center justify-between gap-3"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="size-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shrink-0"
+                >
+                  <iconify-icon
+                    icon="ph:file-pdf"
+                    class="text-chart-1"
+                    width="20"
+                    height="20"
+                  ></iconify-icon>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium truncate">Elena_Rostova_Resume.pdf</p>
+                  <p class="text-xs text-muted-foreground">512 KB · Ready</p>
+                </div>
+              </div>
+              <button
+                class="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive"
+                aria-label="Remove Elena_Rostova_Resume.pdf"
+              >
+                <iconify-icon icon="ph:x" width="16" height="16"></iconify-icon>
+              </button>
+            </div>
+            <div
+              class="rounded-2xl border border-border bg-card p-3.5 flex items-center justify-between gap-3"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="size-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shrink-0"
+                >
+                  <iconify-icon
+                    icon="ph:file-pdf"
+                    class="text-chart-1"
+                    width="20"
+                    height="20"
+                  ></iconify-icon>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium truncate">David_Kim_Portfolio_CV_corrupted.pdf</p>
+                  <p class="text-xs text-muted-foreground">1.1 MB · Ready</p>
+                </div>
+              </div>
+              <button
+                class="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive"
+                aria-label="Remove David_Kim_Portfolio_CV_corrupted.pdf"
+              >
+                <iconify-icon icon="ph:x" width="16" height="16"></iconify-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button
+          class="w-full h-13 py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-sm"
+        >
+          <iconify-icon icon="ph:sparkle" width="16" height="16"></iconify-icon>Run screening (3
+          candidates)
+        </button>
+      </section>
+      <section class="px-6 mt-10 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-heading text-lg font-semibold">Live batch run</h2>
+          <span class="text-xs text-muted-foreground">2 of 3 complete</span>
+        </div>
+        <div class="rounded-3xl border border-border bg-card p-5 space-y-5">
+          <div class="space-y-3 pb-4 border-b border-border">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold">Marcus Chen</p>
+                  <span
+                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-chart-5/15 text-chart-5"
+                    >Screened</span
+                  >
+                </div>
+                <p class="text-xs text-muted-foreground mt-0.5">Marcus_Chen_Staff_Designer.pdf</p>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="font-heading text-2xl font-bold text-chart-5">8.8</span
+                ><span class="text-xs text-muted-foreground">/10</span>
+              </div>
+            </div>
+            <p
+              class="text-xs leading-relaxed text-secondary-foreground bg-secondary/50 p-3 rounded-2xl border border-border/60"
+            >
+              Strong 9-year track record leading design systems at scale. Direct overlap with
+              candidate workflow criteria and code prototyping.
+            </p>
+          </div>
+          <div class="space-y-3 pb-4 border-b border-border">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold">Elena Rostova</p>
+                  <span
+                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-chart-4/15 text-chart-4"
+                    >Screened</span
+                  >
+                </div>
+                <p class="text-xs text-muted-foreground mt-0.5">Elena_Rostova_Resume.pdf</p>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="font-heading text-2xl font-bold text-chart-4">7.4</span
+                ><span class="text-xs text-muted-foreground">/10</span>
+              </div>
+            </div>
+            <p
+              class="text-xs leading-relaxed text-secondary-foreground bg-secondary/50 p-3 rounded-2xl border border-border/60"
+            >
+              Solid product strategy background and multi-platform leadership. Minor experience gap
+              in AI workflow toolchains specifically.
+            </p>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold">David_Kim_Portfolio_CV_corrupted.pdf</p>
+                  <span
+                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-destructive/15 text-destructive"
+                    >Failed</span
+                  >
+                </div>
+                <p class="text-xs text-destructive mt-1">
+                  PDF parser encountered an unreadable binary stream (page 3 damaged).
+                </p>
+              </div>
+              <button
+                class="text-xs font-semibold text-primary underline underline-offset-4 self-center shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <nav
+        class="fixed bottom-0 inset-x-0 h-[84px] bg-background/95 backdrop-blur border-t border-border px-4 flex items-center gap-1 z-10"
+      >
+        <a
+          href="#dashboard"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:squares-four" width="20" height="20"></iconify-icon
+          ><span>Dashboard</span></a
+        ><a
+          href="#screen"
+          class="flex-1 flex flex-col items-center gap-1.5 text-primary text-[11px] font-semibold"
+          ><iconify-icon icon="ph:scan-fill" width="20" height="20"></iconify-icon
+          ><span>Screen</span></a
+        ><a
+          href="#candidates"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:users-three" width="20" height="20"></iconify-icon
+          ><span>Candidates</span></a
+        ><a
+          href="#settings"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:gear-six" width="20" height="20"></iconify-icon
+          ><span>Settings</span></a
+        >
+      </nav>
+    </main>
+  </body>
+</html>

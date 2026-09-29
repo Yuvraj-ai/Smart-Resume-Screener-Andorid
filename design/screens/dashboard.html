@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full,
+      .rounded-none,
+      .rounded-t-full,
+      .rounded-t-none,
+      .rounded-r-full,
+      .rounded-r-none,
+      .rounded-b-full,
+      .rounded-b-none,
+      .rounded-l-full,
+      .rounded-l-none,
+      .rounded-s-full,
+      .rounded-s-none,
+      .rounded-e-full,
+      .rounded-e-none,
+      .rounded-tl-full,
+      .rounded-tl-none,
+      .rounded-tr-full,
+      .rounded-tr-none,
+      .rounded-bl-full,
+      .rounded-bl-none,
+      .rounded-br-full,
+      .rounded-br-none,
+      .rounded-ss-full,
+      .rounded-ss-none,
+      .rounded-se-full,
+      .rounded-se-none,
+      .rounded-es-full,
+      .rounded-es-none,
+      .rounded-ee-full,
+      .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+        --background: #10151c;
+        --foreground: #e8edf2;
+        --primary: #a7f3d0;
+        --primary-foreground: #0b1915;
+        --secondary: #1b242e;
+        --secondary-foreground: #d6dee7;
+        --muted: #27313c;
+        --muted-foreground: #91a0af;
+        --accent: #f2b84b;
+        --accent-foreground: #231a08;
+        --destructive: #e57373;
+        --card: #161d25;
+        --card-foreground: #e8edf2;
+        --popover: #1c2630;
+        --popover-foreground: #e8edf2;
+        --border: #2b3743;
+        --input: #1a232c;
+        --ring: #a7f3d0;
+        --chart-1: #c86b6b;
+        --chart-2: #d99453;
+        --chart-3: #e6b85c;
+        --chart-4: #82b879;
+        --chart-5: #4fae7d;
+
+        --font-sans: "Inter";
+        --font-heading: "Inter";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 1.25rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      style="font-variant-numeric: tabular-nums"
+      class="min-h-screen bg-background text-foreground pb-28"
+    >
+      <header class="px-6 pt-8 pb-6 flex items-start justify-between">
+        <div>
+          <p class="text-xs font-semibold tracking-[0.16em] uppercase text-muted-foreground">
+            Resume Screener
+          </p>
+          <h1 class="font-heading text-[28px] leading-tight font-semibold tracking-[-0.03em] mt-2">
+            Screening overview
+          </h1>
+          <p class="text-sm text-muted-foreground mt-2">A clear read on your candidate pipeline.</p>
+        </div>
+        <button
+          class="size-11 rounded-2xl border border-border bg-card flex items-center justify-center text-muted-foreground"
+          aria-label="Settings"
+        >
+          <iconify-icon icon="ph:gear-six" width="20" height="20"></iconify-icon>
+        </button>
+      </header>
+      <section class="px-6 grid grid-cols-2 gap-3">
+        <div class="rounded-3xl border border-border bg-card p-4 min-h-[112px]">
+          <p class="text-xs text-muted-foreground">Candidates screened</p>
+          <p class="font-heading text-3xl font-semibold mt-3">0</p>
+          <p class="text-[11px] text-muted-foreground mt-1">all time</p>
+        </div>
+        <div class="rounded-3xl border border-border bg-card p-4 min-h-[112px]">
+          <p class="text-xs text-muted-foreground">Average score</p>
+          <p class="font-heading text-3xl font-semibold mt-3">
+            —<span class="text-sm text-muted-foreground font-normal"> /10</span>
+          </p>
+          <p class="text-[11px] text-muted-foreground mt-1">no scores yet</p>
+        </div>
+        <div class="rounded-3xl border border-border bg-card p-4 min-h-[112px]">
+          <p class="text-xs text-muted-foreground">Best score</p>
+          <p class="font-heading text-3xl font-semibold mt-3">
+            —<span class="text-sm text-muted-foreground font-normal"> /10</span>
+          </p>
+          <p class="text-[11px] text-muted-foreground mt-1">your top match</p>
+        </div>
+        <div class="rounded-3xl border border-border bg-card p-4 min-h-[112px]">
+          <p class="text-xs text-muted-foreground">This week</p>
+          <p class="font-heading text-3xl font-semibold mt-3">0</p>
+          <p class="text-[11px] text-muted-foreground mt-1">screenings</p>
+        </div>
+      </section>
+      <section class="px-6 mt-8">
+        <div class="flex items-end justify-between mb-4">
+          <div>
+            <h2 class="font-heading text-lg font-semibold">Score distribution</h2>
+            <p class="text-xs text-muted-foreground mt-1">Candidates by fit score</p>
+          </div>
+          <span class="text-xs text-muted-foreground">1 — 10</span>
+        </div>
+        <div class="rounded-3xl border border-border bg-card p-5">
+          <div class="h-36 flex items-end justify-between gap-2 border-b border-border pb-0">
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">1</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">2</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">3</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">4</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">5</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">6</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">7</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">8</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">9</span>
+            </div>
+            <div class="h-full flex flex-col justify-end items-center gap-2 flex-1">
+              <div class="w-full h-1 rounded-full bg-muted"></div>
+              <span class="text-[10px] text-muted-foreground">10</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
+            <iconify-icon icon="ph:chart-bar-horizontal" width="16" height="16"></iconify-icon
+            ><span>Your distribution will appear after the first screening.</span>
+          </div>
+        </div>
+      </section>
+      <section class="px-6 mt-8">
+        <div class="rounded-3xl border border-primary/30 bg-primary/5 p-6">
+          <div
+            class="size-12 rounded-2xl bg-primary/15 flex items-center justify-center text-primary mb-5"
+          >
+            <iconify-icon icon="ph:file-arrow-up" width="24" height="24"></iconify-icon>
+          </div>
+          <h2 class="font-heading text-xl font-semibold">Start your first screening</h2>
+          <p class="text-sm leading-6 text-muted-foreground mt-2 max-w-[290px]">
+            Upload one or more resumes and paste a job description. We’ll turn them into comparable,
+            explainable scores.
+          </p>
+          <button
+            class="mt-6 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2"
+          >
+            <iconify-icon icon="ph:play" width="16" height="16"></iconify-icon>Run a screening
+          </button>
+        </div>
+      </section>
+      <section class="px-6 mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-heading text-lg font-semibold">Top candidates</h2>
+          <span class="text-xs text-muted-foreground">0 saved</span>
+        </div>
+        <div class="rounded-3xl border border-border bg-card p-5 text-center">
+          <iconify-icon
+            icon="ph:ranking"
+            class="text-muted-foreground"
+            width="24"
+            height="24"
+          ></iconify-icon>
+          <p class="text-sm text-muted-foreground mt-3">
+            Your highest scoring candidates will appear here.
+          </p>
+        </div>
+      </section>
+      <section class="px-6 mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-heading text-lg font-semibold">Recent activity</h2>
+          <span class="text-xs text-muted-foreground">Latest first</span>
+        </div>
+        <div class="rounded-3xl border border-border bg-card p-5 flex items-center gap-3">
+          <div
+            class="size-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground"
+          >
+            <iconify-icon icon="ph:clock-counter-clockwise" width="16" height="16"></iconify-icon>
+          </div>
+          <div>
+            <p class="text-sm font-medium">No screenings yet</p>
+            <p class="text-xs text-muted-foreground mt-1">Completed runs will be saved locally.</p>
+          </div>
+        </div>
+      </section>
+      <nav
+        class="fixed bottom-0 inset-x-0 h-[84px] bg-background/95 backdrop-blur border-t border-border px-4 flex items-center gap-1 z-10"
+      >
+        <a
+          href="#dashboard"
+          class="flex-1 flex flex-col items-center gap-1.5 text-primary text-[11px] font-semibold"
+          ><iconify-icon icon="ph:squares-four-fill" width="20" height="20"></iconify-icon
+          ><span>Dashboard</span></a
+        ><a
+          href="#screen"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:scan" width="20" height="20"></iconify-icon><span>Screen</span></a
+        ><a
+          href="#candidates"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:users-three" width="20" height="20"></iconify-icon
+          ><span>Candidates</span></a
+        ><a
+          href="#settings"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:gear-six" width="20" height="20"></iconify-icon
+          ><span>Settings</span></a
+        >
+      </nav>
+    </main>
+  </body>
+</html>

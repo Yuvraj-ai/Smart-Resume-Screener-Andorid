@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Candidates</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full,
+      .rounded-none,
+      .rounded-t-full,
+      .rounded-t-none,
+      .rounded-r-full,
+      .rounded-r-none,
+      .rounded-b-full,
+      .rounded-b-none,
+      .rounded-l-full,
+      .rounded-l-none,
+      .rounded-s-full,
+      .rounded-s-none,
+      .rounded-e-full,
+      .rounded-e-none,
+      .rounded-tl-full,
+      .rounded-tl-none,
+      .rounded-tr-full,
+      .rounded-tr-none,
+      .rounded-bl-full,
+      .rounded-bl-none,
+      .rounded-br-full,
+      .rounded-br-none,
+      .rounded-ss-full,
+      .rounded-ss-none,
+      .rounded-se-full,
+      .rounded-se-none,
+      .rounded-es-full,
+      .rounded-es-none,
+      .rounded-ee-full,
+      .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+        --background: #10151c;
+        --foreground: #e8edf2;
+        --primary: #a7f3d0;
+        --primary-foreground: #0b1915;
+        --secondary: #1b242e;
+        --secondary-foreground: #d6dee7;
+        --muted: #27313c;
+        --muted-foreground: #91a0af;
+        --accent: #f2b84b;
+        --accent-foreground: #231a08;
+        --destructive: #e57373;
+        --card: #161d25;
+        --card-foreground: #e8edf2;
+        --popover: #1c2630;
+        --popover-foreground: #e8edf2;
+        --border: #2b3743;
+        --input: #1a232c;
+        --ring: #a7f3d0;
+        --chart-1: #c86b6b;
+        --chart-2: #d99453;
+        --chart-3: #e6b85c;
+        --chart-4: #82b879;
+        --chart-5: #4fae7d;
+
+        --font-sans: "Inter";
+        --font-heading: "Inter";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 1.25rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      style="font-variant-numeric: tabular-nums"
+      class="min-h-screen bg-background text-foreground pb-28"
+    >
+      <header class="px-6 pt-8 pb-4">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold tracking-[0.16em] uppercase text-muted-foreground">
+            Candidate database
+          </p>
+          <span class="text-xs text-muted-foreground">24 total records</span>
+        </div>
+        <h1 class="font-heading text-[28px] leading-tight font-semibold tracking-[-0.03em] mt-2">
+          Screened candidates
+        </h1>
+      </header>
+      <div class="px-6 space-y-3">
+        <div class="relative">
+          <iconify-icon
+            icon="ph:magnifying-glass"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+            width="16"
+            height="16"
+          ></iconify-icon
+          ><input
+            type="text"
+            class="w-full h-12 pl-11 pr-4 rounded-2xl bg-card border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition"
+            placeholder="Search by name, role or keyword..."
+            value="Staff"
+          />
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          <button
+            class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground shrink-0"
+          >
+            All roles</button
+          ><button
+            class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-card border border-border text-foreground shrink-0"
+          >
+            Staff Product Designer</button
+          ><button
+            class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-card border border-border text-foreground shrink-0"
+          >
+            Senior ML Engineer</button
+          ><button
+            class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-card border border-border text-foreground shrink-0"
+          >
+            Engineering Lead
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-xs text-muted-foreground pt-1">
+          <div class="flex items-center gap-1.5">
+            <button
+              class="px-2.5 py-1 rounded-lg border border-border bg-card text-foreground font-medium flex items-center gap-1"
+            >
+              <iconify-icon icon="ph:funnel" width="14" height="14"></iconify-icon>Score 7.0+</button
+            ><button
+              class="px-2.5 py-1 rounded-lg border border-border bg-card text-muted-foreground flex items-center gap-1"
+            >
+              This month
+            </button>
+          </div>
+          <button class="flex items-center gap-1 font-medium text-foreground">
+            <iconify-icon icon="ph:arrows-down-up" width="14" height="14"></iconify-icon>Sort: Score
+            (high to low)
+          </button>
+        </div>
+      </div>
+      <section class="px-6 mt-6 space-y-3">
+        <div
+          class="rounded-3xl border border-border bg-card p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div
+              class="size-13 rounded-2xl bg-chart-5/10 border border-chart-5/20 flex flex-col items-center justify-center shrink-0 w-14 h-14"
+            >
+              <span class="font-heading text-lg font-bold text-chart-5 leading-none">9.1</span
+              ><span class="text-[10px] text-muted-foreground mt-0.5">/10</span>
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-heading text-base font-semibold truncate">Aria Vance</h2>
+              <p class="text-xs text-muted-foreground truncate">Staff Product Designer</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] text-muted-foreground">Screened 2h ago</span
+                ><span class="text-[10px] text-muted-foreground">·</span
+                ><span class="text-[10px] text-chart-5 font-semibold">Skills 94%</span>
+              </div>
+            </div>
+          </div>
+          <iconify-icon
+            icon="ph:caret-right"
+            class="text-muted-foreground shrink-0"
+            width="20"
+            height="20"
+          ></iconify-icon>
+        </div>
+        <div
+          class="rounded-3xl border border-border bg-card p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div
+              class="size-13 rounded-2xl bg-chart-5/10 border border-chart-5/20 flex flex-col items-center justify-center shrink-0 w-14 h-14"
+            >
+              <span class="font-heading text-lg font-bold text-chart-5 leading-none">8.8</span
+              ><span class="text-[10px] text-muted-foreground mt-0.5">/10</span>
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-heading text-base font-semibold truncate">Marcus Chen</h2>
+              <p class="text-xs text-muted-foreground truncate">Staff Product Designer</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] text-muted-foreground">Screened 4h ago</span
+                ><span class="text-[10px] text-muted-foreground">·</span
+                ><span class="text-[10px] text-chart-5 font-semibold">Skills 90%</span>
+              </div>
+            </div>
+          </div>
+          <iconify-icon
+            icon="ph:caret-right"
+            class="text-muted-foreground shrink-0"
+            width="20"
+            height="20"
+          ></iconify-icon>
+        </div>
+        <div
+          class="rounded-3xl border border-border bg-card p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div
+              class="size-13 rounded-2xl bg-chart-4/10 border border-chart-4/20 flex flex-col items-center justify-center shrink-0 w-14 h-14"
+            >
+              <span class="font-heading text-lg font-bold text-chart-4 leading-none">7.6</span
+              ><span class="text-[10px] text-muted-foreground mt-0.5">/10</span>
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-heading text-base font-semibold truncate">Siddharth Nair</h2>
+              <p class="text-xs text-muted-foreground truncate">Staff Infrastructure Designer</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] text-muted-foreground">Screened yesterday</span
+                ><span class="text-[10px] text-muted-foreground">·</span
+                ><span class="text-[10px] text-chart-4 font-semibold">Skills 78%</span>
+              </div>
+            </div>
+          </div>
+          <iconify-icon
+            icon="ph:caret-right"
+            class="text-muted-foreground shrink-0"
+            width="20"
+            height="20"
+          ></iconify-icon>
+        </div>
+        <div
+          class="rounded-3xl border border-border bg-card p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div
+              class="size-13 rounded-2xl bg-chart-4/10 border border-chart-4/20 flex flex-col items-center justify-center shrink-0 w-14 h-14"
+            >
+              <span class="font-heading text-lg font-bold text-chart-4 leading-none">7.4</span
+              ><span class="text-[10px] text-muted-foreground mt-0.5">/10</span>
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-heading text-base font-semibold truncate">Elena Rostova</h2>
+              <p class="text-xs text-muted-foreground truncate">Staff Product Designer</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] text-muted-foreground">Screened yesterday</span
+                ><span class="text-[10px] text-muted-foreground">·</span
+                ><span class="text-[10px] text-chart-4 font-semibold">Skills 74%</span>
+              </div>
+            </div>
+          </div>
+          <iconify-icon
+            icon="ph:caret-right"
+            class="text-muted-foreground shrink-0"
+            width="20"
+            height="20"
+          ></iconify-icon>
+        </div>
+        <div
+          class="rounded-3xl border border-border bg-card p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div
+              class="size-13 rounded-2xl bg-chart-3/10 border border-chart-3/20 flex flex-col items-center justify-center shrink-0 w-14 h-14"
+            >
+              <span class="font-heading text-lg font-bold text-chart-3 leading-none">5.9</span
+              ><span class="text-[10px] text-muted-foreground mt-0.5">/10</span>
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-heading text-base font-semibold truncate">Mateo Silva</h2>
+              <p class="text-xs text-muted-foreground truncate">Staff Visual Systems Lead</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] text-muted-foreground">Screened Oct 12</span
+                ><span class="text-[10px] text-muted-foreground">·</span
+                ><span class="text-[10px] text-chart-3 font-semibold">Skills 60%</span>
+              </div>
+            </div>
+          </div>
+          <iconify-icon
+            icon="ph:caret-right"
+            class="text-muted-foreground shrink-0"
+            width="20"
+            height="20"
+          ></iconify-icon>
+        </div>
+        <div
+          class="rounded-3xl border border-border bg-card p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div
+              class="size-13 rounded-2xl bg-chart-1/10 border border-chart-1/20 flex flex-col items-center justify-center shrink-0 w-14 h-14"
+            >
+              <span class="font-heading text-lg font-bold text-chart-1 leading-none">3.8</span
+              ><span class="text-[10px] text-muted-foreground mt-0.5">/10</span>
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-heading text-base font-semibold truncate">Chloe Bennett</h2>
+              <p class="text-xs text-muted-foreground truncate">Associate Product Designer</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-[10px] text-muted-foreground">Screened Oct 11</span
+                ><span class="text-[10px] text-muted-foreground">·</span
+                ><span class="text-[10px] text-chart-1 font-semibold">Skills 35%</span>
+              </div>
+            </div>
+          </div>
+          <iconify-icon
+            icon="ph:caret-right"
+            class="text-muted-foreground shrink-0"
+            width="20"
+            height="20"
+          ></iconify-icon>
+        </div>
+      </section>
+      <nav
+        class="fixed bottom-0 inset-x-0 h-[84px] bg-background/95 backdrop-blur border-t border-border px-4 flex items-center gap-1 z-10"
+      >
+        <a
+          href="#dashboard"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:squares-four" width="20" height="20"></iconify-icon
+          ><span>Dashboard</span></a
+        ><a
+          href="#screen"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:scan" width="20" height="20"></iconify-icon><span>Screen</span></a
+        ><a
+          href="#candidates"
+          class="flex-1 flex flex-col items-center gap-1.5 text-primary text-[11px] font-semibold"
+          ><iconify-icon icon="ph:users-three-fill" width="20" height="20"></iconify-icon
+          ><span>Candidates</span></a
+        ><a
+          href="#settings"
+          class="flex-1 flex flex-col items-center gap-1.5 text-muted-foreground text-[11px]"
+          ><iconify-icon icon="ph:gear-six" width="20" height="20"></iconify-icon
+          ><span>Settings</span></a
+        >
+      </nav>
+    </main>
+  </body>
+</html>
