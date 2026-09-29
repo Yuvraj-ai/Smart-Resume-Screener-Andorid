@@ -36,7 +36,10 @@ android {
     }
     kotlin { jvmToolchain(17) }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 
     testOptions {
         unitTests.isReturnDefaultValues = true
