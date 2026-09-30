@@ -116,7 +116,14 @@ object ResponseSchemas {
         ).jsonObject
     }
 
-    /** Matches `match_score_node.py::MatchResult`, plus the d7 breakdown. */
+    /**
+     * Matches `match_score_node.py::MatchResult`, plus the d7 breakdown.
+     *
+     * `breakdown` must stay in `required`. Verified against a live
+     * OpenAI-compatible endpoint: left optional, the model omitted it entirely,
+     * and MatchResult.breakdown defaults to all zeros, so the UI silently
+     * rendered three empty bars instead of reporting an error.
+     */
     val matchResult: JsonObject by lazy {
         json.parseToJsonElement(
             """
@@ -135,7 +142,7 @@ object ResponseSchemas {
                   "required": ["skills","experience","education"]
                 }
               },
-              "required": ["score","summary"]
+              "required": ["score","summary","breakdown"]
             }
             """.trimIndent()
         ).jsonObject

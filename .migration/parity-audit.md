@@ -110,15 +110,44 @@ to pick another model rather than showing a generic failure.
 The live phone value came back as `+1 415 555 0142`, which confirms the
 source-repository fix that made `phone` a string rather than an int.
 
+## Live verification against a Gemma endpoint
+
+Verified end to end against `gemma-4-31B-it` at a real OpenAI-compatible
+endpoint, using the app's own schemas, prompts and `ScreeningService`.
+
+| Check | Result |
+| --- | --- |
+| Endpoint dialect | confirmed OpenAI, error envelope matches |
+| Key authentication | 200, 5 models offered |
+| `gemma-4-31B-it` offered | yes |
+| `json_schema` enforcement | **genuinely enforced** |
+| Resume extraction | 9/9 fields, `phone=+1 415 555 0142` |
+| JD extraction | 5/5 fields |
+| Scoring | score 9, breakdown populated |
+| Determinism | 4/4 runs identical at score 9 |
+
+Schema enforcement was proved rather than assumed. Asking for a single-value
+enum and a clamped integer produced exactly those values, which the model
+could not have guessed. A bad schema is not rejected, so enforcement comes from
+guided decoding, not validation.
+
+### The bug this caught
+
+`breakdown` was absent from the MatchResult schema's `required` list. The live
+endpoint returned a score and summary with **no breakdown at all**, and
+`MatchResult.breakdown` defaults to all zeros, so the detail screen would have
+rendered three empty bars and reported no error. Every mock test passed,
+because a mock returns what it is told rather than omitting an optional field.
+`breakdown` is now required, and `ResponseSchemasTest` asserts that every
+declared property is required in all three schemas.
+
 ## Unresolved limitations
 
-1. **The scoring call is still unverified against the live API.** Resume and
-   job-description extraction both passed live with correct schema adherence,
-   and scoring uses the same client and the same responseSchema mechanism, but
-   the run hit its quota before reaching it. In particular, it is not yet proven
-   that the model populates the `breakdown` object that decision d7 added; a
-   blank breakdown would render as three zeroed bars. `GeminiClientLiveTest`
-   covers this and will prove it on the next run with quota available.
+1. **Gemini scoring remains unverified against the live API.** Its key hit its
+   quota. The Gemma path is fully verified, and both use the same
+   `ScreeningService`, so the risk is low, but the Gemini-specific request
+   shape has only been exercised against a mock. `GeminiClientLiveTest` covers
+   it for whenever quota is available.
 2. **PDF extraction is verified only on the code path**, not against real-world
    scanned or image-only PDFs. A scanned resume will return the "no selectable
    text" error, which is correct behaviour but untested against a real scan.
