@@ -113,11 +113,27 @@ class SettingsRepository @Inject constructor(
         private const val KEY_PARSE_MODEL = "parse_model"
         private const val KEY_SCORE_MODEL = "score_model"
 
-        /** Model ids match the source pipeline in `parse_*_node.py` and `match_score_node.py`. */
-        const val DEFAULT_PARSE_MODEL = "gemini-2.5-flash"
-        const val DEFAULT_SCORE_MODEL = "gemini-2.5-pro"
+        /**
+         * Rolling aliases, not the pinned ids from the Python source.
+         *
+         * `gemini-2.5-pro`, which the source pipeline used for scoring, now
+         * returns 404 "no longer available to new users" (verified live). A
+         * pinned version breaks the app the day Google retires it, so the
+         * defaults point at `*-latest`, which Google keeps pointing at the
+         * current model of that tier.
+         */
+        const val DEFAULT_PARSE_MODEL = "gemini-flash-latest"
+        const val DEFAULT_SCORE_MODEL = "gemini-pro-latest"
 
-        val PARSE_MODEL_OPTIONS = listOf("gemini-2.5-flash", "gemini-2.5-pro")
-        val SCORE_MODEL_OPTIONS = listOf("gemini-2.5-pro", "gemini-2.5-flash")
+        val PARSE_MODEL_OPTIONS = listOf(
+            "gemini-flash-latest",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+        )
+        val SCORE_MODEL_OPTIONS = listOf(
+            "gemini-pro-latest",
+            "gemini-3.1-pro-preview",
+            "gemini-flash-latest",
+        )
     }
 }

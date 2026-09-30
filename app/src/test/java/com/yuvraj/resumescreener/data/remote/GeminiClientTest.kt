@@ -79,6 +79,21 @@ class GeminiClientTest {
     }
 
     @Test
+    fun `404 maps to ModelUnavailable and keeps Google's own message`() = runTest {
+        // Regression guard: gemini-2.5-pro, the id the Python source pinned,
+        // now returns 404 "no longer available to new users". That must not be
+        // reported as a malformed response, because the fix is different.
+        server.enqueue(
+            MockResponse().setResponseCode(404).setBody(
+                """{"error":{"code":404,"message":"This model models/gemini-2.5-pro is no longer available to new users."}}"""
+            )
+        )
+        val error = runCatching { client().extractResume("t", "gemini-2.5-pro", "k") }.exceptionOrNull()
+        assertTrue(error is GeminiException.ModelUnavailable)
+        assertTrue(error!!.message!!.contains("no longer available"))
+    }
+
+    @Test
     fun `429 maps to RateLimited`() = runTest {
         // Retryable, so every attempt is answered; an empty queue would hang.
         repeat(3) { server.enqueue(MockResponse().setResponseCode(429).setBody("{}")) }

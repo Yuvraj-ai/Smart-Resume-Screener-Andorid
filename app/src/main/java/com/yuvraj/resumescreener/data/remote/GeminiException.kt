@@ -11,7 +11,7 @@ sealed class GeminiException(message: String, cause: Throwable? = null) :
     class InvalidKey(cause: Throwable? = null) :
         GeminiException("The Gemini API key was rejected.", cause)
 
-    /** 429. Retryable; the batch should back off and continue. */
+    /** 429. Retryable on quota, but retrying a hard quota limit just wastes time. */
     class RateLimited(cause: Throwable? = null) :
         GeminiException("Gemini rate limit reached. Try again shortly.", cause)
 
@@ -22,6 +22,15 @@ sealed class GeminiException(message: String, cause: Throwable? = null) :
     /** Transport failure: no connectivity, timeout, DNS. */
     class Network(cause: Throwable? = null) :
         GeminiException("Could not reach Gemini.", cause)
+
+    /**
+     * 404: the model is retired or not available to this key.
+     *
+     * Separate from [MalformedResponse] because the fix is different: the
+     * user needs to pick a different model in Settings, not retry.
+     */
+    class ModelUnavailable(val model: String, val detail: String) :
+        GeminiException("The model $model is unavailable: $detail")
 
     /** 200, but the payload did not match the expected schema. */
     class MalformedResponse(detail: String, cause: Throwable? = null) :

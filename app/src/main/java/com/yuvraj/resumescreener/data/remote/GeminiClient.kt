@@ -9,6 +9,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -128,7 +130,11 @@ class GeminiClient @Inject constructor(
     }
 
     /** Runs the request and maps every failure onto [GeminiException]. */
-    private inline fun <T> execute(request: Request, parse: (String) -> T): T {
+    private inline fun <T> execute(
+        request: Request,
+        model: String = "",
+        parse: (String) -> T,
+    ): T {
         val response = try {
             httpClient.newCall(request).execute()
         } catch (e: IOException) {
@@ -136,17 +142,23 @@ class GeminiClient @Inject constructor(
         }
         response.use {
             val body = it.body?.string().orEmpty()
-            if (!it.isSuccessful) throw mapHttpError(it.code, body)
+            if (!it.isSuccessful) throw mapHttpError(it.code, body, model)
             return parse(body)
         }
     }
 
-    private fun mapHttpError(code: Int, body: String): GeminiException = when (code) {
+    private fun mapHttpError(code: Int, body: String, model: String): GeminiException = when (code) {
         400, 401, 403 -> GeminiException.InvalidKey()
+        404 -> GeminiException.ModelUnavailable(model, extractApiMessage(body))
         429 -> GeminiException.RateLimited()
         in 500..599 -> GeminiException.ServerUnavailable(code)
         else -> GeminiException.MalformedResponse("HTTP $code: ${body.take(200)}")
     }
+
+    /** Google's own wording, which is usually the most actionable part. */
+    private fun extractApiMessage(body: String): String =
+        runCatching { json.parseToJsonElement(body).jsonObject["error"]?.jsonObject?.get("message")?.jsonPrimitive?.content }
+            .getOrNull()?.take(240) ?: "HTTP 404"
 
     private fun extractText(raw: String): String {
         val parsed = json.decodeFromString<GenerateContentResponse>(raw)

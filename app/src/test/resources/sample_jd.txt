@@ -1,0 +1,15 @@
+Staff Backend Engineer, Platform
+
+We are hiring a Staff Backend Engineer to lead the design of our event-driven platform.
+
+Requirements:
+- 6+ years building distributed backend systems in production.
+- Deep experience with PostgreSQL, Kafka or equivalent streaming infrastructure.
+- Strong Python or Kotlin. JVM experience strongly preferred.
+- Experience leading technical design across multiple teams.
+- Kubernetes and infrastructure-as-code in production.
+
+Responsibilities:
+- Own the architecture of our ingestion and replay platform.
+- Mentor senior engineers and raise the team's engineering standards.
+- Partner with product to evolve the platform roadmap.

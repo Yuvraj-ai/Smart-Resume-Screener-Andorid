@@ -81,12 +81,43 @@ fetching from a link.
 | Credential scanning | no live credential in any tracked file |
 | Keystore tracked by git | not committed |
 
+## Live API verification
+
+A real Gemini key was supplied and used to verify the client against the live
+API. This caught a production bug that no mock could have.
+
+| Check | Result |
+| --- | --- |
+| Key authenticates | HTTP 200, models returned |
+| `gemini-2.5-pro` (the source's scoring model) | **404 retired for new users** |
+| `gemini-flash-latest` | 200, works |
+| `gemini-pro-latest` | exists (429 quota, not 404) |
+| Resume extraction honours responseSchema | passed, `name=Jane Doe`, `phone=+1 415 555 0142` |
+| JD extraction honours responseSchema | passed, `job_title=Staff Backend Engineer, Platform` |
+| Scoring call | not reached; quota exhausted mid-run |
+
+### The bug this caught
+
+`gemini-2.5-pro`, which the Python source pinned for scoring, now returns
+`404 This model is no longer available to new users`. Every new user of this app
+would have had scoring fail on every candidate. The defaults now point at
+`gemini-flash-latest` and `gemini-pro-latest`, Google's rolling aliases, so a
+future retirement cannot break the app the same way. A 404 now maps to a distinct
+`ModelUnavailable` error carrying Google's own message, so the UI can tell a user
+to pick another model rather than showing a generic failure.
+
+The live phone value came back as `+1 415 555 0142`, which confirms the
+source-repository fix that made `phone` a string rather than an int.
+
 ## Unresolved limitations
 
-1. **No live Gemini key was available**, so every AI call is verified against a
-   mock server, never the real API. The app is structurally correct but its real
-   model behaviour and prompt output quality are unproven. The source app has
-   the same gap.
+1. **The scoring call is still unverified against the live API.** Resume and
+   job-description extraction both passed live with correct schema adherence,
+   and scoring uses the same client and the same responseSchema mechanism, but
+   the run hit its quota before reaching it. In particular, it is not yet proven
+   that the model populates the `breakdown` object that decision d7 added; a
+   blank breakdown would render as three zeroed bars. `GeminiClientLiveTest`
+   covers this and will prove it on the next run with quota available.
 2. **PDF extraction is verified only on the code path**, not against real-world
    scanned or image-only PDFs. A scanned resume will return the "no selectable
    text" error, which is correct behaviour but untested against a real scan.
