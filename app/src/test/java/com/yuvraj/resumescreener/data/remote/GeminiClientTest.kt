@@ -30,7 +30,22 @@ class GeminiClientTest {
         server.shutdown()
     }
 
-    /** Client pointed at the mock server instead of the real Gemini host. */
+    /**
+     * The same path the app uses, so these exercise the client and the schema
+     * contract together rather than the transport in isolation.
+     */
+    private fun service(client: GeminiClient) =
+        com.yuvraj.resumescreener.domain.ai.ScreeningService(
+            client = client,
+            parseModel = "m",
+            scoreModel = "m",
+            apiKey = "test-key",
+        )
+
+    /**
+     * A client pointed at the mock server. The base URL is overridden so these
+     * tests can never reach the real Gemini host even if a key leaked into CI.
+     */
     private fun client(): GeminiClient {
         val http = OkHttpClient.Builder()
             .callTimeout(2, TimeUnit.SECONDS)
@@ -47,35 +62,35 @@ class GeminiClientTest {
     @Test
     fun `200 returns the deserialized payload`() = runTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody(successBody("""{"name":"Jane Doe"}""")))
-        val resume = client().extractResume("Jane Doe", "gemini-2.5-flash", "test-key")
+        val resume = service(client()).extractResume("Jane Doe")
         assertEquals("Jane Doe", resume.name)
     }
 
     @Test
     fun `the key is sent as a header and never in the url`() = runTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody(successBody("""{"name":"x"}""")))
-        client().extractResume("text", "gemini-2.5-flash", "super-secret-key")
+        service(client()).extractResume("text")
 
         val recorded = server.takeRequest()
-        assertEquals("super-secret-key", recorded.getHeader("x-goog-api-key"))
+        assertEquals("test-key", recorded.getHeader("x-goog-api-key"))
         assertTrue(
             "the key must not appear in the request URL",
-            !recorded.path.orEmpty().contains("super-secret-key"),
+            !recorded.path.orEmpty().contains("test-key"),
         )
     }
 
     @Test
     fun `400 maps to InvalidKey`() = runTest {
         server.enqueue(MockResponse().setResponseCode(400).setBody("""{"error":{"message":"API key not valid"}}"""))
-        val error = runCatching { client().extractResume("t", "m", "bad") }.exceptionOrNull()
-        assertTrue(error is GeminiException.InvalidKey)
+        val error = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(error is LlmException.InvalidKey)
     }
 
     @Test
     fun `403 maps to InvalidKey`() = runTest {
         server.enqueue(MockResponse().setResponseCode(403).setBody("{}"))
-        val error = runCatching { client().extractResume("t", "m", "bad") }.exceptionOrNull()
-        assertTrue(error is GeminiException.InvalidKey)
+        val error = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(error is LlmException.InvalidKey)
     }
 
     @Test
@@ -88,8 +103,8 @@ class GeminiClientTest {
                 """{"error":{"code":404,"message":"This model models/gemini-2.5-pro is no longer available to new users."}}"""
             )
         )
-        val error = runCatching { client().extractResume("t", "gemini-2.5-pro", "k") }.exceptionOrNull()
-        assertTrue(error is GeminiException.ModelUnavailable)
+        val error = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(error is LlmException.ModelUnavailable)
         assertTrue(error!!.message!!.contains("no longer available"))
     }
 
@@ -97,22 +112,22 @@ class GeminiClientTest {
     fun `429 maps to RateLimited`() = runTest {
         // Retryable, so every attempt is answered; an empty queue would hang.
         repeat(3) { server.enqueue(MockResponse().setResponseCode(429).setBody("{}")) }
-        val error = runCatching { client().extractResume("t", "m", "k") }.exceptionOrNull()
-        assertTrue(error is GeminiException.RateLimited)
+        val error = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(error is LlmException.RateLimited)
     }
 
     @Test
     fun `5xx maps to ServerUnavailable`() = runTest {
         repeat(3) { server.enqueue(MockResponse().setResponseCode(503).setBody("{}")) }
-        val error = runCatching { client().extractResume("t", "m", "k") }.exceptionOrNull()
-        assertTrue(error is GeminiException.ServerUnavailable)
+        val error = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(error is LlmException.ServerUnavailable)
     }
 
     @Test
     fun `200 with no candidates is Malformed, not a silent success`() = runTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody("""{"candidates":[]}"""))
-        val error = runCatching { client().extractResume("t", "m", "k") }.exceptionOrNull()
-        assertTrue(error is GeminiException.MalformedResponse)
+        val error = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(error is LlmException.MalformedResponse)
     }
 
     @Test
@@ -121,15 +136,15 @@ class GeminiClientTest {
             MockResponse().setResponseCode(200)
                 .setBody("""{"promptFeedback":{"blockReason":"SAFETY"}}""")
         )
-        val error = runCatching { client().extractResume("t", "m", "k") }.exceptionOrNull()
-        assertTrue(error is GeminiException.Blocked)
+        val error = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(error is LlmException.Blocked)
     }
 
     @Test
     fun `a retryable failure is retried and can then succeed`() = runTest {
         server.enqueue(MockResponse().setResponseCode(503).setBody("{}"))
         server.enqueue(MockResponse().setResponseCode(200).setBody(successBody("""{"name":"Recovered"}""")))
-        val resume = client().extractResume("t", "m", "k")
+        val resume = service(client()).extractResume("t")
         assertEquals("Recovered", resume.name)
         assertEquals("should have made two attempts", 2, server.requestCount)
     }
@@ -137,7 +152,7 @@ class GeminiClientTest {
     @Test
     fun `an invalid key is not retried`() = runTest {
         repeat(3) { server.enqueue(MockResponse().setResponseCode(400).setBody("{}")) }
-        runCatching { client().extractResume("t", "m", "bad") }
+        runCatching { service(client()).extractResume("t") }
         assertEquals(
             "a rejected key will never succeed on retry",
             1, server.requestCount,
@@ -150,15 +165,15 @@ class GeminiClientTest {
             MockResponse().setResponseCode(200)
                 .setBody("""{"models":[{"name":"models/gemini-2.5-flash"}]}""")
         )
-        val models = client().verifyKey("good-key")
-        assertEquals(listOf("models/gemini-2.5-flash"), models)
+        val models = client().listModels("good-key")
+        assertEquals(listOf("gemini-2.5-flash"), models)
     }
 
     @Test
-    fun `the base url is overridable so tests never hit the real api`() {
-        val http = OkHttpClient.Builder().build()
-        val custom = GeminiClient.forBaseUrl(http, "https://example.test/v1beta/")
-        assertTrue(custom.baseUrlForTest().startsWith("https://example.test"))
+    fun `a 200 with an unparseable envelope is malformed`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("not json at all"))
+        val e = runCatching { service(client()).extractResume("t") }.exceptionOrNull()
+        assertTrue(e is LlmException.MalformedResponse)
     }
 
 }

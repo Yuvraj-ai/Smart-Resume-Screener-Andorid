@@ -29,6 +29,7 @@ overall: COMPLETE
 | Aggregate statistics | absent | Dashboard tiles + histogram | added |
 | Full analysis expander | `app.py` expander | Candidate Detail screen | moved to its own window |
 | Gemini key config | `.env` only | Settings, Keystore-encrypted | added as a UI surface |
+| Single hardcoded provider | Gemini only | Gemini or any OpenAI-compatible endpoint | provider chosen in Settings |
 | Mongo URI config | `MONGODB_URI` | none | dropped |
 | Storage backend label | `app.py` caption | Dashboard + Settings | preserved |
 

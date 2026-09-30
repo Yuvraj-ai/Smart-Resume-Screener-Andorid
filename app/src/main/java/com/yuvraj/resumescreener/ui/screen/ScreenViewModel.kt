@@ -3,7 +3,7 @@ package com.yuvraj.resumescreener.ui.screen
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yuvraj.resumescreener.data.remote.GeminiException
+import com.yuvraj.resumescreener.data.remote.LlmException
 import com.yuvraj.resumescreener.domain.usecase.JobDescriptionFetcher
 import com.yuvraj.resumescreener.data.settings.SettingsRepository
 import com.yuvraj.resumescreener.domain.usecase.BatchEvent
@@ -113,11 +113,11 @@ class ScreenViewModel @Inject constructor(
                         }
                     }
                 }
-            } catch (e: GeminiException) {
+            } catch (e: LlmException) {
                 // InvalidKey is the one failure that affects every remaining
                 // file, so it stops the batch rather than failing each in turn.
                 _state.update { s ->
-                    s.copy(error = e.message, missingKey = e is GeminiException.InvalidKey)
+                    s.copy(error = e.message, missingKey = e is LlmException.InvalidKey)
                 }
             } finally {
                 _state.update { s -> s.copy(running = false) }

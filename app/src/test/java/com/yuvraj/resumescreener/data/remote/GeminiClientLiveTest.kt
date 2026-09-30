@@ -29,6 +29,15 @@ class GeminiClientLiveTest {
 
     private val client by lazy { GeminiClient(GeminiClient.defaultHttpClient()) }
 
+    /** The app's own path: client plus schema plus deserialization. */
+    private fun service(parseModel: String, scoreModel: String) =
+        com.yuvraj.resumescreener.domain.ai.ScreeningService(
+            client = client,
+            parseModel = parseModel,
+            scoreModel = scoreModel,
+            apiKey = key().orEmpty(),
+        )
+
     private val resumeText = """
         Jane Doe, Senior Backend Engineer, jane.doe@example.com, +1 415 555 0142.
         Experience: Staff Software Engineer at Northwind Systems 2021-present,
@@ -53,9 +62,9 @@ class GeminiClientLiveTest {
         if (key() == null) return
         try {
             block()
-        } catch (e: GeminiException.RateLimited) {
+        } catch (e: LlmException.RateLimited) {
             println("SKIP quota: ${e.message}")
-        } catch (e: GeminiException.ModelUnavailable) {
+        } catch (e: LlmException.ModelUnavailable) {
             println("SKIP model unavailable: ${e.message}")
         }
     }
@@ -63,7 +72,7 @@ class GeminiClientLiveTest {
     @Test
     fun `the key authenticates against the real api`() = runTest {
         runOrSkip {
-            val models = client.verifyKey(key()!!)
+            val models = client.listModels(key()!!)
             assertTrue("expected some models back", models.isNotEmpty())
             assertTrue(
                 "the parsing model should be available",
@@ -75,7 +84,7 @@ class GeminiClientLiveTest {
     @Test
     fun `the default models still exist`() = runTest {
         runOrSkip {
-            val models = client.verifyKey(key()!!).map { it.substringAfterLast('/') }
+            val models = client.listModels(key()!!).map { it.substringAfterLast('/') }
             // The defaults are rolling aliases precisely so a retired pinned
             // version cannot break the app, so assert they are present.
             assertTrue(
@@ -92,7 +101,7 @@ class GeminiClientLiveTest {
     @Test
     fun `resume extraction honours the responseSchema`() = runTest {
         runOrSkip {
-            val resume = client.extractResume(resumeText, "gemini-flash-latest", key()!!)
+            val resume = service("gemini-flash-latest", "gemini-pro-latest").extractResume(resumeText)
             println("LIVE resume.name=${resume.name} phone=${resume.phone}")
             assertTrue("name should be populated, got '${resume.name}'", resume.name.isNotBlank())
             assertTrue(
@@ -109,7 +118,7 @@ class GeminiClientLiveTest {
     @Test
     fun `job description extraction honours the responseSchema`() = runTest {
         runOrSkip {
-            val job = client.extractJobDescription(jobText, "gemini-flash-latest", key()!!)
+            val job = service("gemini-flash-latest", "gemini-pro-latest").extractJobDescription(jobText)
             println("LIVE job.title=${job.jobTitle}")
             assertTrue("job_title should be populated", job.jobTitle.isNotBlank())
             assertTrue("skills_reqd should be populated", job.skillsRequired.isNotBlank())
@@ -120,9 +129,10 @@ class GeminiClientLiveTest {
     fun `the ported scoring prompt produces a usable result`() = runTest {
         runOrSkip {
             val k = key()!!
-            val resume = client.extractResume(resumeText, "gemini-flash-latest", k)
-            val job = client.extractJobDescription(jobText, "gemini-flash-latest", k)
-            val match = client.score(resume, job, "gemini-pro-latest", k)
+            val svc = service("gemini-flash-latest", "gemini-pro-latest")
+            val resume = svc.extractResume(resumeText)
+            val job = svc.extractJobDescription(jobText)
+            val match = svc.score(resume, job)
 
             println("LIVE score=${match.score} breakdown=${match.breakdown}")
             println("LIVE summary=${match.summary.take(180)}")

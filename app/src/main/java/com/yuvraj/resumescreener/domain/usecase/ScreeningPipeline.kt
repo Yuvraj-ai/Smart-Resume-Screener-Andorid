@@ -1,8 +1,8 @@
 package com.yuvraj.resumescreener.domain.usecase
 
 import android.net.Uri
-import com.yuvraj.resumescreener.data.remote.GeminiClient
-import com.yuvraj.resumescreener.data.remote.GeminiException
+import com.yuvraj.resumescreener.data.remote.LlmException
+import com.yuvraj.resumescreener.domain.ai.ScreeningServiceFactory
 import com.yuvraj.resumescreener.data.repository.ScreeningRepository
 import com.yuvraj.resumescreener.data.settings.SettingsRepository
 import com.yuvraj.resumescreener.domain.model.ScreeningOutcome
@@ -44,7 +44,7 @@ sealed interface BatchEvent {
  */
 @Singleton
 class ScreeningPipeline @Inject constructor(
-    private val gemini: GeminiClient,
+    private val serviceFactory: ScreeningServiceFactory,
     private val extractor: ResumeTextExtractor,
     private val repository: ScreeningRepository,
     private val settings: SettingsRepository,
@@ -58,15 +58,14 @@ class ScreeningPipeline @Inject constructor(
         jobDescription: String,
         onMissingKey: suspend () -> Unit = {},
     ): Flow<BatchEvent> = flow {
-        val apiKey = settings.apiKeyOrNull()
-        if (apiKey == null) {
+        // Resolved per run, so switching provider in Settings takes effect on
+        // the next batch rather than requiring a restart.
+        val service = serviceFactory.create()
+        if (service == null) {
             onMissingKey()
             return@flow
         }
         if (jobDescription.isBlank()) return@flow
-
-        val parseModel = settings.parseModel.value
-        val scoreModel = settings.scoreModel.value
 
         for ((uri, fileName) in files) {
             val progress = FileProgress(uri, fileName)
@@ -75,27 +74,27 @@ class ScreeningPipeline @Inject constructor(
                 val resumeText = extractor.extract(uri)
 
                 emit(BatchEvent.Progress(progress.copy(stage = FileStage.PARSING_RESUME)))
-                val resume = gemini.extractResume(resumeText, parseModel, apiKey)
+                val resume = service.extractResume(resumeText)
 
                 emit(BatchEvent.Progress(progress.copy(stage = FileStage.PARSING_JOB)))
-                val job = gemini.extractJobDescription(jobDescription, parseModel, apiKey)
+                val job = service.extractJobDescription(jobDescription)
 
                 emit(BatchEvent.Progress(progress.copy(stage = FileStage.SCORING)))
-                val match = gemini.score(resume, job, scoreModel, apiKey)
+                val match = service.score(resume, job)
 
                 val outcome = ScreeningOutcome(resume, job, match)
                 emit(BatchEvent.Progress(progress.copy(stage = FileStage.SAVING)))
                 val id = repository.save(fileName, outcome)
 
                 emit(BatchEvent.Completed(progress.copy(stage = FileStage.DONE, outcome = outcome, resultId = id)))
-            } catch (e: GeminiException.InvalidKey) {
+            } catch (e: LlmException.InvalidKey) {
                 // Not per-file: a bad key will fail every remaining call too.
                 emit(BatchEvent.Progress(progress.copy(stage = FileStage.FAILED, error = e.message)))
                 throw e
             } catch (e: Exception) {
                 val reason = when (e) {
                     is PdfExtractionError -> e.message
-                    is GeminiException -> e.message
+                    is LlmException -> e.message
                     else -> "${e::class.simpleName}: ${e.message}"
                 } ?: "Unknown error"
                 emit(BatchEvent.Progress(progress.copy(stage = FileStage.FAILED, error = reason)))

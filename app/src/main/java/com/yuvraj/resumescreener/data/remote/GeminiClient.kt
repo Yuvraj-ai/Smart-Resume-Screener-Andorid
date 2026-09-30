@@ -1,6 +1,7 @@
 package com.yuvraj.resumescreener.data.remote
 
 import com.yuvraj.resumescreener.domain.ai.Prompts
+import com.yuvraj.resumescreener.domain.ai.StructuredLlmClient
 import com.yuvraj.resumescreener.domain.model.JobDescription
 import com.yuvraj.resumescreener.domain.model.MatchResult
 import com.yuvraj.resumescreener.domain.model.Resume
@@ -21,68 +22,35 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Calls the Gemini REST API directly from the device.
+ * Google's Gemini REST API.
  *
- * This is the Android replacement for `langchain_google_genai`. The Python
- * source's three `with_structured_output` calls become three
- * `generateStructured` calls differing only in model, prompt, and schema.
+ * One of the two providers. Its sibling, [OpenAiCompatibleClient], serves any
+ * OpenAI-dialect endpoint, so switching provider never changes the pipeline.
  *
- * The key travels in the `x-goog-api-key` header rather than a query parameter,
- * so it cannot leak into server access logs.
+ * The key travels in the `x-goog-api-key` header rather than a query
+ * parameter, so it cannot leak into server access logs, and it is supplied per
+ * call rather than held here.
  */
 @Singleton
 class GeminiClient @Inject constructor(
     private val httpClient: OkHttpClient,
-) {
-    // Overridable so tests can point at a mock server. Production always uses BASE_URL.
-    internal var baseUrl: String = BASE_URL
-
-    internal fun baseUrlForTest(): String = baseUrl
+) : StructuredLlmClient {
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
-    suspend fun extractResume(resumeText: String, model: String, apiKey: String): Resume =
-        generateStructured(
-            prompt = Prompts.extractResume(resumeText),
-            model = model,
-            schema = ResponseSchemas.resume,
-            apiKey = apiKey,
-        )
+    // Overridable so tests can aim at a mock server. Production always uses
+    // BASE_URL, so a leaked key in CI can never reach the real API.
+    private var baseUrl: String = BASE_URL
 
-    suspend fun extractJobDescription(jdText: String, model: String, apiKey: String): JobDescription =
-        generateStructured(
-            prompt = Prompts.extractJobDescription(jdText),
-            model = model,
-            schema = ResponseSchemas.jobDescription,
-            apiKey = apiKey,
-        )
+    override val providerId: String = LlmProviderIds.GEMINI
+    override val displayName: String = "Google Gemini"
 
-    suspend fun score(resume: Resume, job: JobDescription, model: String, apiKey: String): MatchResult =
-        generateStructured(
-            prompt = Prompts.score(resume, job),
-            model = model,
-            schema = ResponseSchemas.matchResult,
-            apiKey = apiKey,
-        )
-
-    /** Cheapest possible authenticated call, used by the Settings "test connection" action. */
-    suspend fun verifyKey(apiKey: String): List<String> = withContext(Dispatchers.IO) {
-        val request = Request.Builder()
-            .url("$baseUrl/models")
-            .header("x-goog-api-key", apiKey)
-            .get()
-            .build()
-        execute(request) { body ->
-            json.decodeFromString<ModelListResponse>(body).models.map { it.name }
-        }
-    }
-
-    private suspend inline fun <reified T> generateStructured(
-        prompt: String,
+    override suspend fun generate(
         model: String,
+        prompt: String,
         schema: JsonObject,
         apiKey: String,
-    ): T = withContext(Dispatchers.IO) {
+    ): String = withContext(Dispatchers.IO) {
         val payload = GenerateContentRequest(
             contents = listOf(Content(parts = listOf(Part(prompt)))),
             generationConfig = GenerationConfig(responseSchema = schema),
@@ -96,40 +64,53 @@ class GeminiClient @Inject constructor(
             .post(body)
             .build()
 
-        executeWithRetry(request) { raw ->
-            val text = extractText(raw)
-            json.decodeFromString<T>(text)
+        withRetries(request, model) { raw -> extractText(raw) }
+    }
+
+    override suspend fun listModels(apiKey: String): List<String> = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url("$baseUrl/models")
+            .header("x-goog-api-key", apiKey)
+            .get()
+            .build()
+        execute(request) { body ->
+            runCatching { json.decodeFromString<ModelListResponse>(body) }
+                .getOrElse { throw LlmException.MalformedResponse("model list was not JSON") }
+                .models.map { it.name.substringAfterLast('/') }
         }
     }
 
+    override suspend fun verify(apiKey: String): Boolean =
+        runCatching { listModels(apiKey).isNotEmpty() }.getOrDefault(false)
+
     /**
      * Two retries, matching `max_retries=2` in the source nodes. Only
-     * retryable failures are retried: a rejected key or a blocked prompt will
-     * never succeed on a second attempt.
+     * retryable failures are retried: a rejected key or a retired model will
+     * not succeed on a second attempt.
      */
-    private suspend inline fun <T> executeWithRetry(
+    private suspend inline fun <T> withRetries(
         request: Request,
+        model: String,
         crossinline parse: (String) -> T,
     ): T {
-        var last: GeminiException? = null
+        var last: LlmException? = null
         repeat(MAX_ATTEMPTS) { attempt ->
             try {
-                return execute(request) { raw -> parse(raw) }
-            } catch (e: GeminiException) {
+                return execute(request, model) { raw -> parse(raw) }
+            } catch (e: LlmException) {
                 last = e
                 if (!e.isRetryable() || attempt == MAX_ATTEMPTS - 1) throw e
                 delay(RETRY_BASE_DELAY_MS * (attempt + 1))
             }
         }
-        throw last ?: GeminiException.MalformedResponse("exhausted retries")
+        throw last ?: LlmException.MalformedResponse("exhausted retries")
     }
 
-    private fun GeminiException.isRetryable(): Boolean = when (this) {
-        is GeminiException.RateLimited, is GeminiException.ServerUnavailable, is GeminiException.Network -> true
+    private fun LlmException.isRetryable(): Boolean = when (this) {
+        is LlmException.RateLimited, is LlmException.ServerUnavailable, is LlmException.Network -> true
         else -> false
     }
 
-    /** Runs the request and maps every failure onto [GeminiException]. */
     private inline fun <T> execute(
         request: Request,
         model: String = "",
@@ -138,7 +119,7 @@ class GeminiClient @Inject constructor(
         val response = try {
             httpClient.newCall(request).execute()
         } catch (e: IOException) {
-            throw GeminiException.Network(e)
+            throw LlmException.Network(e)
         }
         response.use {
             val body = it.body?.string().orEmpty()
@@ -147,29 +128,33 @@ class GeminiClient @Inject constructor(
         }
     }
 
-    private fun mapHttpError(code: Int, body: String, model: String): GeminiException = when (code) {
-        400, 401, 403 -> GeminiException.InvalidKey()
-        404 -> GeminiException.ModelUnavailable(model, extractApiMessage(body))
-        429 -> GeminiException.RateLimited()
-        in 500..599 -> GeminiException.ServerUnavailable(code)
-        else -> GeminiException.MalformedResponse("HTTP $code: ${body.take(200)}")
+    private fun mapHttpError(code: Int, body: String, model: String): LlmException = when (code) {
+        400, 401, 403 -> LlmException.InvalidKey()
+        404 -> LlmException.ModelUnavailable(model, extractApiMessage(body))
+        429 -> LlmException.RateLimited()
+        in 500..599 -> LlmException.ServerUnavailable(code)
+        else -> LlmException.MalformedResponse("HTTP $code: ${body.take(200)}")
     }
 
-    /** Google's own wording, which is usually the most actionable part. */
+    /** Google's own wording, usually the most actionable part of an error. */
     private fun extractApiMessage(body: String): String =
-        runCatching { json.parseToJsonElement(body).jsonObject["error"]?.jsonObject?.get("message")?.jsonPrimitive?.content }
-            .getOrNull()?.take(240) ?: "HTTP 404"
+        runCatching {
+            json.parseToJsonElement(body).jsonObject["error"]?.jsonObject
+                ?.get("message")?.jsonPrimitive?.content
+        }.getOrNull()?.take(240) ?: "HTTP 404"
 
     private fun extractText(raw: String): String {
-        val parsed = json.decodeFromString<GenerateContentResponse>(raw)
-        parsed.promptFeedback?.blockReason?.let { throw GeminiException.Blocked(it) }
+        // Without this guard a 200 with an unexpected body throws a raw
+        // SerializationException past the error taxonomy, and the user sees a
+        // crash instead of "the response was not what we expected".
+        val parsed = runCatching { json.decodeFromString<GenerateContentResponse>(raw) }
+            .getOrElse { throw LlmException.MalformedResponse("response was not JSON") }
+        parsed.promptFeedback?.blockReason?.let { throw LlmException.Blocked(it) }
         val candidate = parsed.candidates.firstOrNull()
-            ?: throw GeminiException.MalformedResponse("no candidates returned")
+            ?: throw LlmException.MalformedResponse("no candidates returned")
         val text = candidate.content?.parts?.firstOrNull()?.text
         if (text.isNullOrBlank()) {
-            throw GeminiException.MalformedResponse(
-                "empty text, finishReason=${candidate.finishReason}"
-            )
+            throw LlmException.MalformedResponse("empty text, finishReason=${candidate.finishReason}")
         }
         return text
     }
@@ -186,7 +171,7 @@ class GeminiClient @Inject constructor(
 
         fun defaultHttpClient(): OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(120, TimeUnit.SECONDS)
+            .readTimeout(180, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
