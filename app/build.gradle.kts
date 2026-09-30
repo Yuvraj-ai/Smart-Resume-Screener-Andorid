@@ -55,6 +55,11 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        // PDFBox-Android ships its AFM font metrics as AAR assets, and
+        // Robolectric only serves those when Android resources are included.
+        // Without this, PDFTextStripper's static init throws
+        // ExceptionInInitializerError on a missing Times-Roman.afm.
+        unitTests.isIncludeAndroidResources = true
     }
 
     packaging {
@@ -113,5 +118,10 @@ dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    // No Hilt test infrastructure: these tests drive the production graph, which
+    // is higher fidelity. hilt-android-testing-compiler is not published for
+    // KSP at the pinned version, and an @TestInstallIn swap would test a graph
+    // the app never ships.
+    androidTestImplementation(libs.androidx.test.runner)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

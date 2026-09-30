@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yuvraj.resumescreener.ui.theme.AppTheme
@@ -32,14 +33,19 @@ import com.yuvraj.resumescreener.ui.theme.TabularFamily
 import com.yuvraj.resumescreener.ui.theme.scoreColor
 import kotlin.math.roundToInt
 
-/** Small all-caps mono label used as a section eyebrow throughout the design. */
+/**
+ * Small all-caps mono label used as a section eyebrow throughout the design.
+ *
+ * Carries a testTag because the text is uppercased for display, which makes it
+ * awkward to assert against from an instrumented test.
+ */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text.uppercase(),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier,
+        modifier = modifier.testTag("section:$text"),
     )
 }
 
@@ -102,6 +108,9 @@ fun StatTile(
     modifier: Modifier = Modifier,
     valueColor: Color? = null,
 ) {
+    // Bare numerals like "3" are ambiguous: the same value can appear in the
+    // tile, the histogram and a timestamp. Tag by label so tests can be exact.
+    val valueTag = "stat:$label"
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.shapes.large)
@@ -118,6 +127,7 @@ fun StatTile(
             text = value,
             style = MaterialTheme.typography.headlineMedium.copy(fontFamily = TabularFamily),
             color = valueColor ?: MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.testTag(valueTag),
         )
         Spacer(Modifier.height(2.dp))
         Text(

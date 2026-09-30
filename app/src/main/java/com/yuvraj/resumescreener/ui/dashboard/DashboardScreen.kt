@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,7 +61,10 @@ fun DashboardScreen(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        // Tagged so instrumented tests can scroll an item into view: a
+        // LazyColumn does not compose off-screen children, so performScrollTo
+        // on the child alone fails with "node not found".
+        modifier = Modifier.fillMaxSize().testTag("dashboard:list"),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {

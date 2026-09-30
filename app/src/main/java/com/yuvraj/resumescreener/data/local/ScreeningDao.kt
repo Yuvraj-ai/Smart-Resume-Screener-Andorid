@@ -15,6 +15,10 @@ interface ScreeningDao {
     @Delete
     suspend fun delete(entity: ScreeningEntity)
 
+    /** Used by tests to start from a known-empty database. */
+    @Query("DELETE FROM screening_results")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM screening_results WHERE id = :id")
     suspend fun byId(id: Long): ScreeningEntity?
 
