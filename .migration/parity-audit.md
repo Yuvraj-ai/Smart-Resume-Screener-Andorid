@@ -68,7 +68,9 @@ fetching from a link.
 
 | Check | Result |
 | --- | --- |
-| Unit tests | 26 passing |
+| Unit tests | 62 passing |
+| Compose instrumented tests | 8 passing on a Pixel 6 AVD |
+| PDF extractor tests | 9, covering valid, scanned, malformed, truncated, blank |
 | `assembleDebug` | pass |
 | `assembleRelease` (R8, resource shrinking) | pass, 7.9MB |
 | Release APK signature | signed, installed on emulator |
@@ -151,9 +153,10 @@ declared property is required in all three schemas.
 2. **PDF extraction is verified only on the code path**, not against real-world
    scanned or image-only PDFs. A scanned resume will return the "no selectable
    text" error, which is correct behaviour but untested against a real scan.
-3. **No Compose instrumented UI tests.** Screens were verified by walking them on
-   the emulator and inspecting screenshots, not by automated assertions. The
-   test matrix calls for instrumented tests that do not yet exist.
+3. ~~No Compose instrumented UI tests.~~ **Closed.** Eight instrumented tests
+   now cover navigation across all four sections, the empty state, dashboard
+   aggregates, the candidates list, the weighted rubric breakdown, and delete
+   both cancelled and confirmed. Delete had previously never been exercised.
 4. **Delete is unverified against a real record** in the release build. It was
    implemented but not exercised end to end after the R8 build.
 5. **MongoDB sync is absent**, as decided. Revisiting it needs an Atlas Data API

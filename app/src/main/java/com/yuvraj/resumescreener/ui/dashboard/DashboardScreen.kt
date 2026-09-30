@@ -117,6 +117,7 @@ fun DashboardScreen(
             Column(
                 Modifier
                     .fillMaxWidth()
+                    .testTag("dashboard:distribution")
                     .background(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.shapes.large)
                     .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
                     .padding(18.dp)

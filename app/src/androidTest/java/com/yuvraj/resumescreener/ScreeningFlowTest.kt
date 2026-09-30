@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -116,10 +117,11 @@ class ScreeningFlowTest {
         openSection("Candidates", "Screened candidates")
         openSectionByEyebrow("Settings", "Model provider")
 
-        // Back to Dashboard. The list kept its previous scroll offset, so the
-        // heading is off-screen; scroll it back before asserting.
-        composeRule.onNodeWithTag("dashboard:list")
-            .performScrollToNode(hasTestTag("section:Screening overview"))
+        // Navigate back. Dashboard is not composed while Settings is showing,
+        // so the list has to exist again before anything about it can be
+        // asserted, and a fresh composition starts scrolled to the top.
+        composeRule.onAllNodesWithText("Dashboard").onFirst().performClick()
+        composeRule.waitForIdle()
         composeRule.onNodeWithTag("section:Screening overview").assertIsDisplayed()
     }
 
@@ -145,10 +147,12 @@ class ScreeningFlowTest {
         composeRule.onNodeWithTag("stat:Average score").assertTextEquals("7.9")
         composeRule.onNodeWithTag("stat:Best score").assertTextEquals("9.1")
         composeRule.onNodeWithTag("stat:This week").assertTextEquals("3")
-        // Scroll the un-composed chart into view before asserting on it.
+        // Scroll the chart into view: a LazyColumn does not compose
+        // off-screen children, so it must be scrolled before it can be asserted.
         composeRule.onNodeWithTag("dashboard:list")
-            .performScrollToNode(hasTestTag("section:Score distribution"))
-        composeRule.onNodeWithTag("section:Score distribution").assertIsDisplayed()
+            .performScrollToNode(hasTestTag("dashboard:distribution"))
+        composeRule.onNodeWithTag("dashboard:distribution").assertIsDisplayed()
+        composeRule.onNodeWithText("Score distribution").assertIsDisplayed()
     }
 
     @Test
