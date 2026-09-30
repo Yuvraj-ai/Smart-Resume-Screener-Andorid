@@ -145,13 +145,13 @@ class OpenAiCompatibleClient(
         }.getOrNull()?.take(240)
 
         return when (code) {
-            401, 403 -> LlmException.InvalidKey()
+            401, 403 -> LlmException.InvalidKey(message)
             404 -> if (model.isBlank()) {
                 LlmException.Unreachable("the base URL did not answer at /models")
             } else {
                 LlmException.ModelUnavailable(model, message ?: "not found")
             }
-            429 -> LlmException.RateLimited()
+            429 -> LlmException.RateLimited(message)
             in 500..599 -> LlmException.ServerUnavailable(code)
             else -> LlmException.MalformedResponse("HTTP $code: ${message ?: body.take(160)}")
         }

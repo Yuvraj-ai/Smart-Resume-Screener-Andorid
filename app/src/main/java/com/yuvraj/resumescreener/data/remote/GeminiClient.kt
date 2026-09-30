@@ -129,9 +129,9 @@ class GeminiClient @Inject constructor(
     }
 
     private fun mapHttpError(code: Int, body: String, model: String): LlmException = when (code) {
-        400, 401, 403 -> LlmException.InvalidKey()
+        400, 401, 403 -> LlmException.InvalidKey(extractApiMessage(body).takeIf { it != "HTTP 404" })
         404 -> LlmException.ModelUnavailable(model, extractApiMessage(body))
-        429 -> LlmException.RateLimited()
+        429 -> LlmException.RateLimited(extractApiMessage(body).takeIf { it != "HTTP 404" })
         in 500..599 -> LlmException.ServerUnavailable(code)
         else -> LlmException.MalformedResponse("HTTP $code: ${body.take(200)}")
     }

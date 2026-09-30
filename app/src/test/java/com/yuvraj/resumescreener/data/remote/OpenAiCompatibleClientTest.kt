@@ -114,6 +114,43 @@ class OpenAiCompatibleClientTest {
     }
 
     @Test
+    fun `an inactive key surfaces the providers own wording`() = runTest {
+        // Regression guard from a real endpoint: generalcompute returned
+        // "API key is inactive". Our own wording ("the key was rejected") is
+        // strictly less useful, so the server's message must win.
+        server.enqueue(
+            MockResponse().setResponseCode(401).setBody(
+                """{"error":{"message":"API key is inactive","type":"invalid_request_error","code":"invalid_api_key"}}"""
+            )
+        )
+        val e = runCatching { client().generate("m", "p", ResponseSchemas.resume, "k") }.exceptionOrNull()
+        assertTrue(e is LlmException.InvalidKey)
+        assertEquals("API key is inactive", e!!.message)
+    }
+
+    @Test
+    fun `no user-facing message names a specific provider`() = runTest {
+        // The app can point at either provider, so a message naming Gemini
+        // would be actively wrong on the OpenAI-compatible path.
+        val cases = listOf(
+            LlmException.InvalidKey("boom"),
+            LlmException.RateLimited(),
+            LlmException.ServerUnavailable(500),
+            LlmException.Network(),
+            LlmException.Unreachable("no /models"),
+            LlmException.ModelUnavailable("m", "gone"),
+            LlmException.MalformedResponse("bad"),
+            LlmException.Blocked("SAFETY"),
+        )
+        cases.forEach { e ->
+            assertFalse(
+                "message should not name Gemini or a provider: ${e.message}",
+                e.message!!.contains("Gemini", ignoreCase = true),
+            )
+        }
+    }
+
+    @Test
     fun `429 maps to RateLimited`() = runTest {
         server.enqueue(MockResponse().setResponseCode(429).setBody("{}"))
         val e = runCatching { client().generate("m", "p", ResponseSchemas.resume, "k") }.exceptionOrNull()
